@@ -33,7 +33,7 @@ trait Routable extends HttpService with RHelpers {
 
   def match0[C]() = ???
 
-  def root = ???
+  def root[C](action: String) = macro RoutableImpl.rootImpl[C]
 
   def resourse = ???
 }
@@ -57,6 +57,30 @@ object RoutableImpl {
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
 
+  def rootImpl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+
+    val methodName = action.tree match {
+      case Literal(Constant(x)) => s"$x"
+    }
+
+    val method = c.weakTypeOf[C].declaration(newTermName(methodName))
+
+    if (method == NoSymbol) {
+      c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
+    }
+
+    val route = q"""
+      path("") {
+        val controller = new ${c.weakTypeOf[C]}{}
+        get {
+          complete{controller.$method}
+        }
+      }
+    """
+    c.Expr[Route](route)
+  }
+
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
       (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
@@ -64,17 +88,17 @@ object RoutableImpl {
   }
 
   def post0Impl[C: c.WeakTypeTag](c: Context)
-                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+               (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
     methodImpl[C](c)(tuple, HttpMethods.POST)
   }
 
   def put0Impl[C: c.WeakTypeTag](c: Context)
-                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+              (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
     methodImpl[C](c)(tuple, HttpMethods.PUT)
   }
 
   def delete0Impl[C: c.WeakTypeTag](c: Context)
-                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
     methodImpl[C](c)(tuple, HttpMethods.DELETE)
   }
 
@@ -134,9 +158,6 @@ object RoutableImpl {
 
     c.Expr[Route](route)
   }
-
-
-
 
   def customImpl[C: c.WeakTypeTag](c: Context)
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
