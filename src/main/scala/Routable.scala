@@ -56,6 +56,10 @@ object RoutableImpl {
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
 
+
+  def method
+
+
   def get0Impl[C: c.WeakTypeTag](c: Context)
               (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
     import c.universe._
@@ -135,120 +139,3 @@ object RoutableImpl {
 
   }
 }
-/*
-TypeRef(
-  ThisType(spray.routing),
-  spray.routing.PathMatcher,
-  List(
-    TypeRef(
-      ThisType(shapeless),
-      shapeless.$colon$colon,
-      List(
-        TypeRef(
-          ThisType(scala), scala.Int, List()
-        ),
-        TypeRef(
-          ThisType(shapeless),
-          shapeless.HNil,
-          List()
-        )
-      )
-    )
-  )
-)
-
-*/
-/*
-TypeRef(
-  ThisType(spray.routing),
-  spray.routing.PathMatcher,
-  List(
-    TypeRef(
-      ThisType(shapeless),
-      shapeless.$colon$colon,
-      List(
-        TypeRef(
-          ThisType(scala), scala.Int, List()
-        ),
-        TypeRef(
-          ThisType(shapeless), shapeless.$colon$colon,
-          List(
-            TypeRef(
-              SingleType(
-                ThisType(scala), scala.Predef
-              ),
-              newTypeName("String"),
-              List()
-            ),
-            TypeRef(
-              ThisType(shapeless), shapeless.HNil, List()
-            )
-          )
-        )
-      )
-    )
-  )
-)
-*/
-/*
-Apply(
-  TypeApply(
-    Select(
-      Select(
-        This(newTypeName("routing")),
-        spray.routing.Prepender
-      ),
-      newTermName("apply")
-    ),
-    List(TypeTree(), TypeTree(), TypeTree())
-  ),
-  List(
-    Apply(
-      TypeApply(
-        Select(
-          Select(This(newTypeName("shapeless")), shapeless.PrependAux),
-          newTermName("hlistPrepend")
-        ),
-        List(TypeTree(), TypeTree(), TypeTree(), TypeTree())
-      ),
-      List(
-        TypeApply(
-          Select(
-            Select(
-              This(newTypeName("shapeless")), shapeless.PrependAux),
-            newTermName("hnilPrepend")
-          ),
-          List(TypeTree())
-        )
-      )
-    )
-  )
-)
-
-
-Apply(
-  TypeApply(
-    Select(
-      Select(
-        This(newTypeName("routing")), spray.routing.Prepender
-      ),
-      newTermName("apply")
-    ),
-    List(TypeTree(), TypeTree(), TypeTree())
-  ),
-  List(
-    TypeApply(
-      Select(
-        Select(
-          This(newTypeName("shapeless")),
-          shapeless.PrependAux
-        ),
-        newTermName("hnilPrepend")
-      ),
-      List(TypeTree())
-    )
-  )
-)
-
-
-*/
