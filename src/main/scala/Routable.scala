@@ -25,10 +25,11 @@ trait Routable extends HttpService with RHelpers {
 
   import HttpMethods._
   def custom[C](tuple: (PathMatcher[_ <: HList], String)) = macro RoutableImpl.customImpl[C]
-  def get0[C](tuple: (PathMatcher[_ <: HList], String)) = macro RoutableImpl.get0Impl[C]
-  def post0 = ???
-  def put0 = ???
-  def delete0 = ???
+
+  def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro RoutableImpl.get0Impl[C]
+  def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro RoutableImpl.post0Impl[C]
+  def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro RoutableImpl.put0Impl[C]
+  def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro RoutableImpl.delete0Impl[C]
 
   def match0[C]() = ???
 
@@ -57,11 +58,28 @@ object RoutableImpl {
   }
 
 
-  def method
-
-
   def get0Impl[C: c.WeakTypeTag](c: Context)
-              (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+      (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+      methodImpl[C](c)(tuple, HttpMethods.GET)
+  }
+
+  def post0Impl[C: c.WeakTypeTag](c: Context)
+                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+    methodImpl[C](c)(tuple, HttpMethods.POST)
+  }
+
+  def put0Impl[C: c.WeakTypeTag](c: Context)
+                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+    methodImpl[C](c)(tuple, HttpMethods.PUT)
+  }
+
+  def delete0Impl[C: c.WeakTypeTag](c: Context)
+                                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+    methodImpl[C](c)(tuple, HttpMethods.DELETE)
+  }
+
+  def methodImpl[C: c.WeakTypeTag](c: Context)
+                (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod): c.Expr[Route] = {
     import c.universe._
 
     val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
@@ -80,7 +98,6 @@ object RoutableImpl {
 
     val method = c.weakTypeOf[C].declaration(newTermName(methodName))
 
-
     if (method == NoSymbol) {
       c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
     }
@@ -93,11 +110,13 @@ object RoutableImpl {
       case x => Ident(newTermName(s"tmp$x"))
     }.toList
 
+    val httpMethod = newTermName(mth.toString.toLowerCase)
+
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
           val controller = new ${c.weakTypeOf[C]}{}
-          get {
+          $httpMethod {
             complete{ controller.$method(..$vals) }
           }
         }
@@ -106,7 +125,7 @@ object RoutableImpl {
       q"""
         pathPrefix($pm) {
           val controller = new ${c.weakTypeOf[C]}{}
-          get {
+          $httpMethod {
             complete{ controller.$method }
           }
         }
@@ -115,6 +134,9 @@ object RoutableImpl {
 
     c.Expr[Route](route)
   }
+
+
+
 
   def customImpl[C: c.WeakTypeTag](c: Context)
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
