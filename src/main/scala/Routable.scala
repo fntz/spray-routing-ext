@@ -24,7 +24,6 @@ trait Routable extends HttpService with RHelpers {
   import spray.routing.Route
 
   import HttpMethods._
-  def custom[C](tuple: (PathMatcher[_ <: HList], String)) = macro RoutableImpl.customImpl[C]
 
   def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro RoutableImpl.get0Impl[C]
   def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro RoutableImpl.post0Impl[C]
@@ -158,25 +157,6 @@ object RoutableImpl {
 
     c.Expr[Route](route)
   }
-
-  def customImpl[C: c.WeakTypeTag](c: Context)
-                (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    import c.universe._
-
-    val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
-
-    println(pm)
-
-    val route = q"""
-      path("/") {
-        get {
-          complete("1")
-        }
-      }
-    """
-    c.Expr[Route](route)
-  }
-
 
   def match0Impl[C: c.WeakTypeTag](c: Context)
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)], via: c.Expr[List[HttpMethod]]): c.Expr[Route] = {
