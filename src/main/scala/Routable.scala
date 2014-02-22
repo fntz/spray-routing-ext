@@ -31,7 +31,7 @@ trait Routable extends HttpService with RHelpers {
   def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro RoutableImpl.put0Impl[C]
   def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro RoutableImpl.delete0Impl[C]
 
-  def match0[C]() = ???
+  def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro RoutableImpl.match0Impl[C]
 
   def root[C](action: String) = macro RoutableImpl.rootImpl[C]
 
@@ -178,7 +178,21 @@ object RoutableImpl {
   }
 
 
-  def match0Impl[C: c.WeakTypeTag](c: Context) = {
+  def match0Impl[C: c.WeakTypeTag](c: Context)
+                (tuple: c.Expr[(PathMatcher[_ <: HList], String)], via: c.Expr[List[HttpMethod]]): c.Expr[Route] = {
+    import c.universe._
 
+    val block = via.tree.collect {
+      case Select(Select(Select(Ident(_), _), _), x) =>
+        val httpMethod = newTermName(s"$x".toLowerCase+"0")
+        val impl = c.weakTypeOf[Routable].declaration(httpMethod)
+        q"$impl[${c.weakTypeOf[C]}]($tuple)"
+    }.reduce((a, b) => q"$a ~ $b" )
+
+    val route = q"""
+        $block
+    """
+
+    c.Expr[Route](route)
   }
 }
