@@ -2,14 +2,11 @@
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
-import shapeless.Nat._0
-import spray.http.Uri.Path.Segment
 import spray.routing._
 import spray.http._
-import MediaTypes._
 import shapeless._
 import shapeless.Traversables._
-import spray.http.Uri.Path
+import spray.routing.PathMatchers.IntNumber
 
 trait RHelpers {
   implicit class S2A(path: String) {
@@ -34,12 +31,68 @@ trait Routable extends HttpService with RHelpers {
 
   def root[C](action: String) = macro RoutableImpl.rootImpl[C]
 
-  def resourse = ???
+  def resourse[C, M] = macro RoutableImpl.resourseImpl[C, M]
 }
 
 object RoutableImpl {
   import spray.routing.Route
 
+  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
+    import c.universe._
+
+    val startPath = s"${c.weakTypeOf[M].typeSymbol.name.toString.toLowerCase}"
+
+    val params = c.weakTypeOf[M].declarations.collect {
+      case x: MethodSymbol if x.isConstructor =>
+        x.paramss.map(_.map(_.asTerm))
+    }.flatMap(_.flatten)
+
+    if (params.exists(_.isParamWithDefault)) {
+      c.warning(c.enclosingPosition, s"Class `${c.weakTypeOf[M]}` have parameter with default!")
+    }
+
+    val paramNames = params.map(_.name.toString).map(Symbol(_))
+    val extract = paramNames.zip(params.map(_.typeSignature)).map{
+        case (s, t) =>
+          if (t.<:<(typeOf[Option[_]]))
+            q"${s}.?"
+          else
+            q"${s}.as[$t]"
+    }.toList
+
+    val model = newTermName(s"${c.weakTypeOf[M].typeSymbol.name}")
+
+    val route = q"""
+      pathPrefix($startPath) {
+        val controller = new ${c.weakTypeOf[C]}{}
+        pathPrefix(IntNumber) { num =>
+          pathPrefix("edit") {
+            get { complete { controller.edit(num) } }
+          } ~
+          get { complete { controller.show(num) } } ~
+          put { complete { controller.update(num) } } ~
+          delete { complete { controller.delete(num) } }
+        } ~
+        pathPrefix("new") {
+          get {
+            complete { controller.fresh }
+          }
+        } ~
+        post {
+          formFields(..$extract).as($model) { (model) =>
+              complete(controller.create(model))
+          }
+        } ~
+        get {
+          complete { controller.index }
+        }
+      }
+    """
+
+    c.Expr[Route](route)
+  }
+
+  //string2impl remove TODO - code dublicate!
   def string2Impl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
     import c.universe._
 
@@ -80,7 +133,7 @@ object RoutableImpl {
     c.Expr[Route](route)
   }
 
-
+  //FIXME: possible bug when route as "route" ~> "action" ?
   def get0Impl[C: c.WeakTypeTag](c: Context)
       (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
       methodImpl[C](c)(tuple, HttpMethods.GET)
@@ -106,14 +159,18 @@ object RoutableImpl {
     import c.universe._
 
     val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
-    val z = pm.tpe
 
     //FIXME: rewrite this
     var count = 0
-    z.foreach {
-      case x  =>
-        if (x.termSymbol.isPackage && x.toString.contains("scala")) count += 1
+    if (pm.children.size == 1) {
+      count = 1
+    } else {
+      pm.tpe.foreach {
+        case x  =>
+          if (x.termSymbol.isPackage && x.toString.contains("scala")) count += 1
+      }
     }
+
 
     val methodName = action match {
       case Literal(Constant(x)) => x.asInstanceOf[String]
@@ -161,7 +218,7 @@ object RoutableImpl {
   def match0Impl[C: c.WeakTypeTag](c: Context)
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)], via: c.Expr[List[HttpMethod]]): c.Expr[Route] = {
     import c.universe._
-
+    //TODO: check Routable type in current compilation unit
     val block = via.tree.collect {
       case Select(Select(Select(Ident(_), _), _), x) =>
         val httpMethod = newTermName(s"$x".toLowerCase+"0")
