@@ -10,10 +10,10 @@ import spray.routing.PathMatchers.IntNumber
 
 trait RHelpers {
   implicit class S2A(path: String) {
-    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.string2Impl
+    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
   }
   implicit class PM2A(pm: PathMatcher[_ <: HList]) {
-    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.path2Impl
+    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
   }
 }
 
@@ -92,16 +92,7 @@ object RoutableImpl {
     c.Expr[Route](route)
   }
 
-  //string2impl remove TODO - code dublicate!
-  def string2Impl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
-    import c.universe._
-
-    val pm = c.prefix.tree.children.toList(1)
-    val t = q"($pm, $action)"
-    c.Expr[(PathMatcher[_ <: HList], String)](t)
-  }
-
-  def path2Impl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
+  def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
     import c.universe._
 
     val pm = c.prefix.tree.children.toList(1)
