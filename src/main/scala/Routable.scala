@@ -11,6 +11,7 @@ import spray.routing.PathMatchers.IntNumber
 trait RHelpers {
   implicit class S2A(path: String) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
+    def :->(str: String*): (String, List[String]) = macro RoutableImpl.assocImpl
   }
   implicit class PM2A(pm: PathMatcher[_ <: HList]) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
@@ -32,10 +33,28 @@ trait Routable extends HttpService with RHelpers {
   def root[C](action: String) = macro RoutableImpl.rootImpl[C]
 
   def resourse[C, M] = macro RoutableImpl.resourseImpl[C, M]
+
 }
+
 
 object RoutableImpl {
   import spray.routing.Route
+
+  def assocImpl(c: Context)(str: c.Expr[String]*): c.Expr[(String, List[String])] = {
+    import c.universe._
+
+    val it = c.prefix.tree match {
+      case Apply(Select(_, _), List(x)) => x
+    }
+    val list = str.collect {
+      case Expr(x) => x
+    }.toList
+
+    val result = q"($it, List[String](..$list))"
+    c.Expr[(String, List[String])](result)
+  }
+
+
 
   def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
     import c.universe._
@@ -224,3 +243,30 @@ object RoutableImpl {
     c.Expr[Route](route)
   }
 }
+/*
+Apply(TypeApply(Select(Apply(_, List(x)), _), _), List(y))
+Apply(
+  TypeApply(
+    Select(
+      Apply(
+        TypeApply(
+          Select(
+            Select(
+              This(newTypeName("scala")), scala.Predef
+            ),
+            newTermName("any2ArrowAssoc")
+          ),
+          List(TypeTree()
+          )
+        ),
+        List(Literal(Constant("a")))
+      ),
+      newTermName("$minus$greater")
+    ),
+    List(TypeTree())
+  ),
+  List(
+    Literal(Constant(1))
+  )
+)
+*/
