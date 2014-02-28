@@ -35,11 +35,24 @@ trait Routable extends HttpService with RHelpers {
   def resourse[C, M](configs: (String, List[String])*) = macro RoutableImpl.resourseImpl[C, M]
   def resourse[C, M] = macro RoutableImpl.resourseImpl0[C, M]
 
+  def scope(path: String)(block: Route) = macro RoutableImpl.scopeImpl
 }
 
 
 object RoutableImpl {
   import spray.routing.Route
+
+  def scopeImpl(c: Context)(path: c.Expr[String])(block: c.Expr[Route]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""
+      pathPrefix($path) {
+        $block
+      }
+    """
+
+    c.Expr[Route](route)
+  }
 
   def assocImpl(c: Context)(str: c.Expr[String]*): c.Expr[(String, List[String])] = {
     import c.universe._
