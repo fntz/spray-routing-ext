@@ -32,7 +32,8 @@ trait Routable extends HttpService with RHelpers {
 
   def root[C](action: String) = macro RoutableImpl.rootImpl[C]
 
-  def resourse[C, M] = macro RoutableImpl.resourseImpl[C, M]
+  def resourse[C, M](configs: (String, List[String])*) = macro RoutableImpl.resourseImpl[C, M]
+  def resourse[C, M] = macro RoutableImpl.resourseImpl0[C, M]
 
 }
 
@@ -54,10 +55,15 @@ object RoutableImpl {
     c.Expr[(String, List[String])](result)
   }
 
-
-
-  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
+  def resourseImpl0[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
     import c.universe._
+    val r = q"""("only", List("index", "show", "create", "edit", "update", "delete", "new"))"""
+    resourseImpl[C, M](c)(c.Expr[(String, List[String])](r))
+  }
+
+  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)(configs: c.Expr[(String, List[String])]*): c.Expr[Route] = {
+    import c.universe._
+
 
     val startPath = s"${c.weakTypeOf[M].typeSymbol.name.toString.toLowerCase}"
 
@@ -70,6 +76,24 @@ object RoutableImpl {
       c.warning(c.enclosingPosition, s"Class `${c.weakTypeOf[M]}` have parameter with default!")
     }
 
+    val list = configs.toList.collect {
+      case x => x.tree.collect {
+        case Apply(_, List(Literal(Constant(x)), Apply(_, y))) =>
+          val z = y.collect {
+            case Literal(Constant(x)) => x
+          }
+          (x, z)
+      }
+    }.flatten.toList
+
+    val only = list.filter{ x => x._1 == "only" }
+                   .map(_._2)
+                   .foldLeft(List[Any]())(_ ++ _)
+
+    val exclude = list.filter{ x => x._1 == "exlcude" }
+                      .map(_._2)
+                      .foldLeft(List[Any]())(_ ++ _)
+
     val paramNames = params.map(_.name.toString).map(Symbol(_))
     val extract = paramNames.zip(params.map(_.typeSignature)).map{
         case (s, t) =>
@@ -80,33 +104,55 @@ object RoutableImpl {
     }.toList
 
     val model = newTermName(s"${c.weakTypeOf[M].typeSymbol.name}")
+    val controller = c.weakTypeOf[C]
 
-    val route = q"""
-      pathPrefix($startPath) {
-        val controller = new ${c.weakTypeOf[C]}{}
-        pathPrefix(IntNumber) { num =>
-          pathPrefix("edit") {
-            get { complete { controller.edit(num) } }
-          } ~
-          get { complete { controller.show(num) } } ~
-          put { complete { controller.update(num) } } ~
-          delete { complete { controller.delete(num) } }
-        } ~
-        pathPrefix("new") {
-          get {
-            complete { controller.fresh }
-          }
-        } ~
-        post {
+    val show = q"""get0[$controller](IntNumber ~> "show")"""
+    val index = q"get { complete { controller.index } }"
+    val edit = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
+    val update = q"""put0[$controller](IntNumber ~> "update")"""
+    val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
+    val create = q"""
+      post {
           formFields(..$extract).as($model) { (model) =>
               complete(controller.create(model))
           }
-        } ~
-        get {
-          complete { controller.index }
         }
-      }
     """
+    val fresh = q"""get0[$controller]("new" ~> "fresh")"""
+
+    val originalActions = List(
+      ("edit", edit), ("show", show), ("update", update), ("delete", delete), ("new", fresh), ("create", create), ("index", index)
+    )
+
+    val onlyActions = originalActions.filter{
+      x => only.contains(x._1)
+    }
+    val excludeActions = originalActions.filter {
+      x => exclude.contains(x._1)
+    }
+
+    val resultRoute = (if (!onlyActions.isEmpty) {
+      onlyActions
+    } else {
+      originalActions diff excludeActions
+    }).map(_._2)
+
+    //edit, show, update, delete, new, create, index
+    val route = if (resultRoute.isEmpty) {
+      q"""
+        pathPrefix($startPath) {
+          val controller = new ${c.weakTypeOf[C]}{}
+        }
+       """
+    } else {
+      val actions = resultRoute.reduce((a,b) => q"$a ~ $b")
+      q"""
+        pathPrefix($startPath) {
+          val controller = new ${c.weakTypeOf[C]}{}
+          $actions
+        }
+       """
+    }
 
     c.Expr[Route](route)
   }
@@ -244,29 +290,30 @@ object RoutableImpl {
   }
 }
 /*
-Apply(TypeApply(Select(Apply(_, List(x)), _), _), List(y))
+Apply(_, List(x, Apply(_, y))) =>
 Apply(
   TypeApply(
-    Select(
-      Apply(
-        TypeApply(
-          Select(
-            Select(
-              This(newTypeName("scala")), scala.Predef
-            ),
-            newTermName("any2ArrowAssoc")
-          ),
-          List(TypeTree()
-          )
-        ),
-        List(Literal(Constant("a")))
-      ),
-      newTermName("$minus$greater")
-    ),
-    List(TypeTree())
+    Select(Ident(scala.Tuple2), newTermName("apply")),
+    List(TypeTree(), TypeTree())
   ),
   List(
-    Literal(Constant(1))
+    Literal(Constant("include")),
+    Apply(
+      TypeApply(
+        Select(Select(This(newTypeName("immutable")), scala.collection.immutable.List), newTermName("apply")),
+        List(
+          TypeTree().setOriginal(
+            Select(
+              Select(This(newTypeName("scala")), scala.Predef),
+              newTypeName("String")
+            )
+          )
+        )
+      ),
+      List(Literal(Constant("1")), Literal(Constant("2")), Literal(Constant("3")))
+    )
   )
 )
+
+
 */
