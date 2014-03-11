@@ -8,6 +8,11 @@ import shapeless._
 import shapeless.Traversables._
 
 trait HttpMethdods {
+  def get0[C](action: String)    = macro HttpMethdodsImpl.get01Impl[C]
+  def post0[C](action: String)   = macro HttpMethdodsImpl.post01Impl[C]
+  def put0[C](action: String)    = macro HttpMethdodsImpl.put01Impl[C]
+  def delete0[C](action: String) = macro HttpMethdodsImpl.delete01Impl[C]
+
   def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethdodsImpl.get0Impl[C]
   def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethdodsImpl.post0Impl[C]
   def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethdodsImpl.put0Impl[C]
@@ -15,6 +20,35 @@ trait HttpMethdods {
 }
 
 object HttpMethdodsImpl {
+
+  def get01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""get0[${c.weakTypeOf[C]}]($action ~> $action)"""
+    c.Expr[Route](route)
+  }
+
+  def post01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""post0[${c.weakTypeOf[C]}]($action ~> $action)"""
+    c.Expr[Route](route)
+  }
+
+  def put01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""put0[${c.weakTypeOf[C]}]($action ~> $action)"""
+    c.Expr[Route](route)
+  }
+
+  def delete01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""delete0[${c.weakTypeOf[C]}]($action ~> $action)"""
+    c.Expr[Route](route)
+  }
+
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
     methodImpl[C](c)(tuple, HttpMethods.GET)
