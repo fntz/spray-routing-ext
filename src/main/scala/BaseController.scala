@@ -1,7 +1,6 @@
 
-import spray.routing.HttpService
-
-trait BaseController extends HttpService {
+trait BaseController {
   def request: spray.http.HttpRequest
-  def format:  List[spray.http.MediaRange]
 }
+
+

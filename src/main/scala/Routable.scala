@@ -6,19 +6,9 @@ import spray.routing._
 import spray.http._
 import shapeless._
 import shapeless.Traversables._
-import spray.routing.PathMatchers.IntNumber
+//import spray.http.MediaTypes._
 
-trait RHelpers {
-  implicit class S2A(path: String) {
-    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
-    def :->(str: String*): (String, List[String]) = macro RoutableImpl.assocImpl
-  }
-  implicit class PM2A(pm: PathMatcher[_ <: HList]) {
-    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro RoutableImpl.aliasImpl
-  }
-}
-
-trait Routable extends HttpService with RHelpers {
+trait Routable extends HttpService with Helpers {
   import spray.routing.Route
 
   import HttpMethods._
@@ -52,20 +42,6 @@ object RoutableImpl {
     """
 
     c.Expr[Route](route)
-  }
-
-  def assocImpl(c: Context)(str: c.Expr[String]*): c.Expr[(String, List[String])] = {
-    import c.universe._
-
-    val it = c.prefix.tree match {
-      case Apply(Select(_, _), List(x)) => x
-    }
-    val list = str.collect {
-      case Expr(x) => x
-    }.toList
-
-    val result = q"($it, List[String](..$list))"
-    c.Expr[(String, List[String])](result)
   }
 
   def resourseImpl0[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
@@ -127,7 +103,7 @@ object RoutableImpl {
     val create = q"""
       post {
           formFields(..$extract).as($model) { (model) =>
-              complete(controller.create(model))
+            complete(controller.create(model))
           }
         }
     """
@@ -150,33 +126,34 @@ object RoutableImpl {
       originalActions diff excludeActions
     }).map(_._2)
 
+    //TODO: requestInstance
     //edit, show, update, delete, new, create, index
     val route = if (resultRoute.isEmpty) {
       q"""
         pathPrefix($startPath) {
-          val controller = new ${c.weakTypeOf[C]}{}
+          requestInstance { request0 =>
+            val controller = new ${c.weakTypeOf[C]}{
+              def request = request0
+            }
+          }
         }
        """
     } else {
       val actions = resultRoute.reduce((a,b) => q"$a ~ $b")
       q"""
         pathPrefix($startPath) {
-          val controller = new ${c.weakTypeOf[C]}{}
-          $actions
+          requestInstance { request0 =>
+            val controller = new ${c.weakTypeOf[C]}{
+              def request = request0
+            }
+            $actions
+          }
         }
        """
     }
-
     c.Expr[Route](route)
   }
 
-  def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
-    import c.universe._
-
-    val pm = c.prefix.tree.children.toList(1)
-    val t = q"($pm, $action)"
-    c.Expr[(PathMatcher[_ <: HList], String)](t)
-  }
 
   def rootImpl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
     import c.universe._
@@ -193,9 +170,13 @@ object RoutableImpl {
 
     val route = q"""
       path("") {
-        val controller = new ${c.weakTypeOf[C]}{}
-        get {
-          complete{controller.$method}
+        requestInstance { request0 =>
+          val controller = new ${c.weakTypeOf[C]}{
+            def request = request0
+          }
+          get {
+            complete{controller.$method}
+          }
         }
       }
     """
@@ -264,18 +245,26 @@ object RoutableImpl {
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
-          val controller = new ${c.weakTypeOf[C]}{}
-          $httpMethod {
-            complete{ controller.$method(..$vals) }
+          requestInstance { request0 =>
+            val controller = new ${c.weakTypeOf[C]}{
+              def request = request0
+            }
+            $httpMethod {
+              complete{ controller.$method(..$vals) }
+            }
           }
         }
       """
     } else {
       q"""
         pathPrefix($pm) {
-          val controller = new ${c.weakTypeOf[C]}{}
-          $httpMethod {
-            complete{ controller.$method }
+          requestInstance { request0 =>
+            val controller = new ${c.weakTypeOf[C]}{
+              def request = request0
+            }
+            $httpMethod {
+              complete{ controller.$method }
+            }
           }
         }
       """
@@ -302,31 +291,3 @@ object RoutableImpl {
     c.Expr[Route](route)
   }
 }
-/*
-Apply(_, List(x, Apply(_, y))) =>
-Apply(
-  TypeApply(
-    Select(Ident(scala.Tuple2), newTermName("apply")),
-    List(TypeTree(), TypeTree())
-  ),
-  List(
-    Literal(Constant("include")),
-    Apply(
-      TypeApply(
-        Select(Select(This(newTypeName("immutable")), scala.collection.immutable.List), newTermName("apply")),
-        List(
-          TypeTree().setOriginal(
-            Select(
-              Select(This(newTypeName("scala")), scala.Predef),
-              newTypeName("String")
-            )
-          )
-        )
-      ),
-      List(Literal(Constant("1")), Literal(Constant("2")), Literal(Constant("3")))
-    )
-  )
-)
-
-
-*/
