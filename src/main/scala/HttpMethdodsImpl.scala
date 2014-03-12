@@ -2,25 +2,24 @@
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
-import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
 import spray.http._
 import shapeless._
 import shapeless.Traversables._
 
-trait HttpMethdods {
-  def get0[C](action: String)    = macro HttpMethdodsImpl.get01Impl[C]
-  def post0[C](action: String)   = macro HttpMethdodsImpl.post01Impl[C]
-  def put0[C](action: String)    = macro HttpMethdodsImpl.put01Impl[C]
-  def delete0[C](action: String) = macro HttpMethdodsImpl.delete01Impl[C]
+trait HttpMethods {
+  def get0[C](action: String)    = macro HttpMethodsImpl.get01Impl[C]
+  def post0[C](action: String)   = macro HttpMethodsImpl.post01Impl[C]
+  def put0[C](action: String)    = macro HttpMethodsImpl.put01Impl[C]
+  def delete0[C](action: String) = macro HttpMethodsImpl.delete01Impl[C]
 
-  def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethdodsImpl.get0Impl[C]
-  def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethdodsImpl.post0Impl[C]
-  def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethdodsImpl.put0Impl[C]
-  def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpMethdodsImpl.delete0Impl[C]
+  def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.get0Impl[C]
+  def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethodsImpl.post0Impl[C]
+  def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.put0Impl[C]
+  def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpMethodsImpl.delete0Impl[C]
 }
 
-object HttpMethdodsImpl {
+object HttpMethodsImpl {
 
   def get01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
     import c.universe._
@@ -92,7 +91,7 @@ object HttpMethdodsImpl {
     }
 
     val method = c.weakTypeOf[C].declaration(newTermName(methodName))
-
+    println(method)
     if (method == NoSymbol) {
       c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
     }

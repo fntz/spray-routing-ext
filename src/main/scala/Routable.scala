@@ -4,7 +4,7 @@ import scala.reflect.macros.Context
 
 import spray.routing._
 
-trait Routable extends HttpService with HttpMethdods with HttpHelpers with Helpers {
+trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
   def resourse[C, M](configs: (String, List[String])*)                                = macro RoutableImpl.resourseImpl[C, M]
   def resourse[C, M]                                                                  = macro RoutableImpl.resourseImpl0[C, M]
   def resourse[C, M](block: Route)                                                    = macro RoutableImpl.resourseImplWithBlock[C, M]
