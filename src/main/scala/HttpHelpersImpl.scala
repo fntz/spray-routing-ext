@@ -8,8 +8,12 @@ import shapeless._
 
 trait HttpHelpers {
   //match0[C]("path" ~> "method")
+  //match0[C]("path-method", via)
   //match0[C]("path-methpd") //default with GET
   //match0[C]("path" ~> "method", List(GET))
+  def match0[C](action: String) = macro HttpHelpersImpl.match01[C]
+  def match0[C](action: String, via: List[HttpMethod]) = macro HttpHelpersImpl.match02[C]
+  def match0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpHelpersImpl.match03[C]
   def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro HttpHelpersImpl.match0Impl[C]
   def root[C](action: String) = macro HttpHelpersImpl.rootImpl[C]
   def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
@@ -56,6 +60,24 @@ object HttpHelpersImpl {
     c.Expr[Route](route)
   }
 
+  def match01[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
+    import c.universe._
+    val via = q"List(spray.http.HttpMethods.GET)"
+    c.Expr[Route](q"""match0[${c.weakTypeOf[C]}]($action ~> $action, $via)""")
+  }
+
+  def match02[C: c.WeakTypeTag](c: Context)(action: c.Expr[String], via: c.Expr[List[HttpMethod]]): c.Expr[Route] = {
+    import c.universe._
+    c.Expr[Route](q"""match0[${c.weakTypeOf[C]}]($action ~> $action, $via)""")
+  }
+
+  def match03[C: c.WeakTypeTag](c: Context)(tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+    import c.universe._
+
+    val via = q"List(spray.http.HttpMethods.GET)"
+    c.Expr[Route](q"""match0[${c.weakTypeOf[C]}]($tuple, $via)""")
+  }
+
   def match0Impl[C: c.WeakTypeTag](c: Context)
                                   (tuple: c.Expr[(PathMatcher[_ <: HList], String)], via: c.Expr[List[HttpMethod]]): c.Expr[Route] = {
     import c.universe._
@@ -66,7 +88,7 @@ object HttpHelpersImpl {
         val impl = c.weakTypeOf[HttpMethods].declaration(httpMethod)
         q"$impl[${c.weakTypeOf[C]}]($tuple)"
     }.reduce((a, b) => q"$a ~ $b" )
-     
+
     val route = q"""
         $block
     """

@@ -91,7 +91,7 @@ object HttpMethodsImpl {
     }
 
     val method = c.weakTypeOf[C].declaration(newTermName(methodName))
-    println(method)
+
     if (method == NoSymbol) {
       c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
     }
