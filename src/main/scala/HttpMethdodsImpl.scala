@@ -2,6 +2,7 @@
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
+import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
 import spray.http._
 import shapeless._
@@ -86,7 +87,6 @@ object HttpMethdodsImpl {
       }
     }
 
-
     val methodName = action match {
       case Literal(Constant(x)) => x.asInstanceOf[String]
     }
@@ -115,7 +115,7 @@ object HttpMethdodsImpl {
               def request = request0
             }
             $httpMethod {
-              complete{ controller.$method(..$vals) }
+              controller.$method(..$vals)
             }
           }
         }
@@ -128,7 +128,7 @@ object HttpMethdodsImpl {
               def request = request0
             }
             $httpMethod {
-              complete{ controller.$method }
+              controller.$method
             }
           }
         }
