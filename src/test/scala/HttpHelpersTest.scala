@@ -32,7 +32,6 @@ trait HttpHelpersTestable extends Routable {
     } ~
     match0[HttpHelpersController]("baz0" ~> "baz", List(GET, PUT)) ~
     match0[HttpHelpersController]("baz") ~
-    match0[HttpHelpersController]("baz", List(DELETE)) ~
     match0[HttpHelpersController]("baz1" ~> "baz")
   }
 
@@ -63,29 +62,44 @@ class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with
       Get("/scope/baz0") ~> route ~> check {
         responseAs[String] should startWith("baz")
       }
+      Put("/scope/baz0") ~> route ~> check {
+        responseAs[String] should startWith("baz")
+      }
+      Delete("/scope/baz0") ~> route ~> check {
+        handled should be(false)
+      }
+      Post("/scope/baz0") ~> route ~> check {
+        handled should be(false)
+      }
     }
 
     it("should handle with GET by default and only action name as path") {
       Get("/scope/baz") ~> route ~> check {
         responseAs[String] should startWith("baz")
       }
-    }
-
-    it("should handle with GET when custom path") {
       Delete("/scope/baz") ~> route ~> check {
+        handled should be(false)
+      }
+      Post("/scope/baz0") ~> route ~> check {
+        handled should be(false)
+      }
+      Put("/scope/baz0") ~> route ~> check {
         responseAs[String] should startWith("baz")
       }
     }
 
-    it("should handle with DELETE for only action name as path") {
+    it("should handle when mathc0 without httpmethods") {
+      Put("/scope/baz1") ~> route ~> check {
+        handled should be(false)
+      }
+      Post("/scope/baz1") ~> route ~> check {
+        handled should be(false)
+      }
+      Delete("/scope/baz1") ~> route ~> check {
+        handled should be(false)
+      }
       Get("/scope/baz1") ~> route ~> check {
         responseAs[String] should startWith("baz")
-      }
-    }
-
-    it("should not handle when mathc0 without httpmethods") {
-      Delete("/scope/baz1") ~> route ~> check {
-        handled === false
       }
     }
   }
