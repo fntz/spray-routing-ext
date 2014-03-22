@@ -3,22 +3,78 @@ import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
 import spray.routing._
-
+import scala.language.implicitConversions
+//TODO: Listr[String] ~> String* ; config as exclude
 trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
-  def resourse[C, M](configs: (String, List[String])*)                                = macro RoutableImpl.resourseImpl[C, M]
-  def resourse[C, M]                                                                  = macro RoutableImpl.resourseImpl0[C, M]
-  def resourse[C, M](block: Route)                                                    = macro RoutableImpl.resourseImplWithBlock[C, M]
-  def resourse[C, M](configs: (String, List[String])*)(block: Route)                  = macro RoutableImpl.resourseImplWithBlockAndConfig[C, M]
+
+  def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
+  def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
+  def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
+  def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
 }
+
 
 object RoutableImpl {
   import spray.routing.Route
 
-  def resourseImplWithBlockAndConfig[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-                                    (configs: c.Expr[(String, List[String])]*)(block: c.Expr[Route]): c.Expr[Route] = {
+  def resourse4Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
     import c.universe._
 
-    val startPath = s"${c.weakTypeOf[M].typeSymbol.name.toString.toLowerCase}"
+    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String]())"""
+    c.Expr[Route](route)
+  }
+
+  def resourse1Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                   (block: c.Expr[Route]): c.Expr[Route] = {
+    import c.universe._
+
+    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block)"""
+    c.Expr[Route](route)
+  }
+
+  def resourse0Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                   (exclude: c.Expr[List[String]]): c.Expr[Route] = {
+    import c.universe._
+
+    val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
+
+    val result = getRoute[C, M](c)(exclude)
+
+    val route = q"""
+      pathPrefix($startPath) {
+          $result
+        }
+    """
+
+    c.Expr[Route](route)
+  }
+  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                  (exclude: c.Expr[List[String]], block: c.Expr[Route]): c.Expr[Route] = {
+    import c.universe._
+
+    val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
+
+    val result = getRoute[C, M](c)(exclude)
+
+    val route = q"""
+      pathPrefix($startPath) {
+          $result ~
+          $block
+        }
+    """
+
+    c.Expr[Route](route)
+  }
+
+
+  private def convertToPath(s: String) = {
+    val r = "[A-Z]".r
+    (r replaceAllIn(s"${s.head.toString.toLowerCase}${s.tail}", "-$0")).toLowerCase
+  }
+
+  private def getRoute[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+              (exclude: c.Expr[List[String]]): c.Expr[Route] = {
+    import c.universe._
 
     val params = c.weakTypeOf[M].declarations.collect {
       case x: MethodSymbol if x.isConstructor =>
@@ -29,23 +85,9 @@ object RoutableImpl {
       c.warning(c.enclosingPosition, s"Class `${c.weakTypeOf[M]}` have parameter with default!")
     }
 
-    val list = configs.toList.collect {
-      case x => x.tree.collect {
-        case Apply(_, List(Literal(Constant(x)), Apply(_, y))) =>
-          val z = y.collect {
-            case Literal(Constant(x)) => x
-          }
-          (x, z)
-      }
-    }.flatten.toList
-
-    val only = list.filter{ x => x._1 == "only" }
-      .map(_._2)
-      .foldLeft(List[Any]())(_ ++ _)
-
-    val exclude = list.filter{ x => x._1 == "exlcude" }
-      .map(_._2)
-      .foldLeft(List[Any]())(_ ++ _)
+    val list = exclude.tree.collect {
+      case Literal(Constant(x)) => s"$x"
+    }.toList
 
     val paramNames = params.map(_.name.toString).map(Symbol(_))
     val extract = paramNames.zip(params.map(_.typeSignature)).map{
@@ -56,82 +98,44 @@ object RoutableImpl {
           q"${s}.as[$t]"
     }.toList
 
+    if (extract.isEmpty) {
+      c.abort(c.enclosingPosition, s"Model `${c.weakTypeOf[M]}` should have a parameters!")
+    }
+
     val model = newTermName(s"${c.weakTypeOf[M].typeSymbol.name}")
     val controller = c.weakTypeOf[C]
 
     val show   = q"""get0[$controller](IntNumber ~> "show")"""
-    val index  = q"get { complete { controller.index } }"
+    val index  = q"""get0[$controller]("index")"""
     val edit   = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
     val update = q"""put0[$controller](IntNumber ~> "update")"""
     val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
     val create = q"""
-      post {
-          formFields(..$extract).as($model) { (model) =>
-            complete(controller.create(model))
+      requestInstance { request0 =>
+        post {
+            val controller = new ${c.weakTypeOf[C]}{
+              def request = request0
+            }
+
+            formFields(..$extract).as($model) { (model) =>
+              controller.create(model)
+            }
           }
-        }
+      }
     """
+
     val fresh = q"""get0[$controller]("new" ~> "fresh")"""
 
     val originalActions = List(
       ("edit", edit), ("show", show), ("update", update), ("delete", delete), ("new", fresh), ("create", create), ("index", index)
     )
 
-    val onlyActions = originalActions.filter{
-      x => only.contains(x._1)
-    }
-    val excludeActions = originalActions.filter {
-      x => exclude.contains(x._1)
-    }
+    val excludeActions = originalActions.filter { x => list.contains(x._1)}
 
-    val resultRoute = (if (!onlyActions.isEmpty) {
-      onlyActions
-    } else {
-      originalActions diff excludeActions
-    }).map(_._2)
+    val resultRoute = (originalActions diff excludeActions) map(_._2)
 
-    //edit, show, update, delete, new, create, index
-    val route = if (resultRoute.isEmpty) {
-      q"""
-        pathPrefix($startPath) {
-          requestInstance { request0 =>
-            val controller = new ${c.weakTypeOf[C]}{
-              def request = request0
-            }
-          }
-          $block
-        }
-       """
-    } else {
-      val actions = resultRoute.reduce((a,b) => q"$a ~ $b")
-      q"""
-        pathPrefix($startPath) {
-          requestInstance { request0 =>
-            val controller = new ${c.weakTypeOf[C]}{
-              def request = request0
-            }
-            $actions
-          }
-          $block
-        }
-       """
-    }
-    c.Expr[Route](route)
+    val route = resultRoute.reduce((a,b) => q"$a ~ $b")
+    c.Expr[Route](q"$route")
   }
 
-  def resourseImplWithBlock[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)(block: c.Expr[Route]): c.Expr[Route] = {
-    import c.universe._
-    c.Expr[Route](q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}]()($block)""")
-  }
-
-  def resourseImpl0[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
-    import c.universe._
-    val r = q"""("only", List("index", "show", "create", "edit", "update", "delete", "new"))"""
-    c.Expr[Route](q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}]($r)""")
-  }
-
-  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)(configs: c.Expr[(String, List[String])]*): c.Expr[Route] = {
-    import c.universe._
-    c.Expr[Route](q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](..$configs){}""")
-  }
 }
