@@ -7,17 +7,136 @@ import spray.routing._
 import spray.http._
 import shapeless._
 
+  /**
+   *  Contain a route helpers
+   *
+   */
 trait HttpHelpers {
+  /**
+   * Take a method. And provide tranformation into route. By default use [[spray.http.HttpMethods.GET]] for request.
+   * {{{
+   *   match0[Contoller]("index")
+   * }}}
+   * Will be transform:
+   * {{{
+   *   pathPrefix("index") {
+   *     get {
+   *       controller.index
+   *     }
+   *   }
+   * }}}
+   * @param action [[String]] information about method. This method will be use as route path.
+   * @tparam C - you controller type
+   * @return [[Route]]
+   */
   def match0[C](action: String)                                                  = macro HttpHelpersImpl.match01[C]
+
+  /**
+   * Take a method. And provide transformation into route.
+   * {{{
+   *   match0[Controller]("index", List(GET, DELETE))
+   * }}}
+   *  Will be transform:
+   *  {{{
+   *    pathPrefix("index") {
+   *      get {
+   *        controller.index
+   *      } ~
+   *      delete {
+   *        controller.index
+   *      }
+   *    }
+   *  }}}
+   * @param action: [[String]] use as method from controller and path for request.
+   * @param via: [[List[spray.http.HttpMethod]]] - a list with http methods for handle request.
+   * @tparam C: you controller type
+   * @return [[Route]]
+   */
   def match0[C](action: String, via: List[HttpMethod])                           = macro HttpHelpersImpl.match02[C]
+
+  /**
+   * Take a path with method for handle request. By default use [[spray.http.HttpMethods.GET]] for http method.
+   * {{{
+   *   match0[Controller](("show" / IntNumber) ~> "my_show")
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *     get {
+   *       controller.my_show(num)
+   *     }
+   *   }
+   * }}}
+   * @param tuple: [[(PathMatcher[_ <: HList], String)]] path with method for handle request.
+   * @tparam C - you controller
+   * @return [[Route]]
+   */
   def match0[C](tuple: (PathMatcher[_ <: HList], String))                        = macro HttpHelpersImpl.match03[C]
+
+  /** Take a path with method for handle request, with list of http methods.
+   *
+   * {{{
+   *   match0[Controller](("show" / IntNumber) ~> "my_method", List(GET, DELETE))
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *     get {
+   *       controller.my_method(num)
+   *     } ~
+   *     delete {
+   *       controller.my_method(num)
+   *     }
+   *   }
+   * }}}
+   *
+   * @param tuple [[(PathMatcher[_ <: HList], String)]] path with method for handle request.
+   * @param via [[List[spray.http.HttpMethod]]] - a list with http methods for handle request.
+   * @tparam C - you controller type
+   * @return [[Route]]
+   */
   def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro HttpHelpersImpl.match0Impl[C]
 
+  /** A root path
+   *  {{{
+   *    root[Controller]("root")
+   *  }}}
+   *  transform to
+   *  {{{
+   *    pathPrefix("") { controller.root }
+   *  }}}
+   * @param action - a controller method.
+   * @tparam C - you controller type
+   * @return [[Route]]
+   */
   def root[C](action: String)           = macro HttpHelpersImpl.rootImpl[C]
 
+  /** Method for create
+   *
+   * {{{
+   *   scope("scope") {
+   *     pathPrefix("foo") {
+   *       get { complete("wow") }
+   *   }
+   * }}}
+   *
+   * transform to
+   * {{{
+   *   pathPrefix("scope") {
+   *     //you block
+   *   }
+   * }}}
+   * @param path [[String]] string for path
+   * @param block [[Route]]
+   * @return [[Route]]
+   */
   def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
 }
 
+/**
+ * Object with macro implementation for [[spray.routing.ext.HttpHelpers]]
+ *
+ */
 object HttpHelpersImpl {
   def scopeImpl(c: Context)(path: c.Expr[String])(block: c.Expr[Route]): c.Expr[Route] = {
     import c.universe._

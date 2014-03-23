@@ -8,18 +8,128 @@ import spray.http._
 import shapeless._
 import shapeless.Traversables._
 
+/** Trait containt http methods realisation
+ *
+ */
 trait HttpMethods {
+
+  /**
+   * Take an action which use as route path.
+   *
+   * @param action [[String]] use as route and as method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def get0[C](action: String)    = macro HttpMethodsImpl.get01Impl[C]
+
+  /**
+   * Take an action which use as route path.
+   *
+   * @param action [[String]] use as route and as method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def post0[C](action: String)   = macro HttpMethodsImpl.post01Impl[C]
+
+  /**
+   * Take an action which use as route path.
+   *
+   * @param action [[String]] use as route and as method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def put0[C](action: String)    = macro HttpMethodsImpl.put01Impl[C]
+
+  /**
+   * Take an action which use as route path.
+   *
+   * @param action [[String]] use as route and as method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def delete0[C](action: String) = macro HttpMethodsImpl.delete01Impl[C]
 
+  /**
+   * Take a tuple with path and method for controller
+   * {{{
+   *   get0[Controller]( ("show" / IntNumber) ~> "my_method")
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *     get {
+   *       controller.my_method(num)
+   *     }
+   *   }
+   * }}}
+   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.get0Impl[C]
+
+  /**
+   * Take a tuple with path and method for controller
+   * {{{
+   *   post0[Controller]( ("show" / IntNumber) ~> "my_method")
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *     post {
+   *       controller.my_method(num)
+   *     }
+   *   }
+   * }}}
+   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethodsImpl.post0Impl[C]
+
+  /**
+   * Take a tuple with path and method for controller
+   * {{{
+   *   put0[Controller]( ("show" / IntNumber) ~> "my_method")
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *    put {
+   *       controller.my_method(num)
+   *     }
+   *   }
+   * }}}
+   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.put0Impl[C]
+
+  /**
+   * Take a tuple with path and method for controller
+   * {{{
+   *   delete0[Controller]( ("show" / IntNumber) ~> "my_method")
+   * }}}
+   * transform to
+   * {{{
+   *   pathPrefix("show" / IntNumber) { num =>
+   *     delete {
+   *       controller.my_method(num)
+   *     }
+   *   }
+   * }}}
+   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @tparam C - your controller
+   * @return [[Route]]
+   */
   def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpMethodsImpl.delete0Impl[C]
 }
 
+/**
+ * Object with http methods implementation.
+ *
+ */
 object HttpMethodsImpl {
 
   def get01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {

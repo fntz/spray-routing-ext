@@ -6,19 +6,85 @@ import scala.reflect.macros.Context
 import spray.routing._
 import scala.language.implicitConversions
 
-
+/**
+ * Object for transformation String* into [[List]]
+ * {{{
+ *   exclude("index")
+ * }}}
+ */
 object exclude {
   def apply(xs: String*) = xs.toList
 }
 
+/** Trait contatin methods for resourse implementation.
+ *  With resourse method you might quick create routes for you controller. Also map form information onto Model.
+ *  {{{
+ *    resourse[Controller, Model]
+ *  }}}
+ *   transform to
+ *  {{{
+ *    pathPrefix("model") {
+ *      //methods for controller.index
+ *      // controller.show
+ *      // ...
+ *    }
+ *
+ * Note: for `new` method in controller use `fresh` name.
+ */
 trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
+
+  /** Define routes without excluded pathes.
+   * {{{
+   *   resourse[Controller, Model](exclude("index", "show", "new"))
+   * }}}
+   * @param exclude - list with excluded methods (index, show, ...)
+   * @tparam C - you controller
+   * @tparam M - you model
+   * @return [[Route]]
+   */
   def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
+
+  /** Define routes with nested block
+   *  {{{
+   *    resourse[Controller, Model] {
+   *      get0[Controller]("other")
+   *    }
+   *  }}}
+   * @param block [[Route]] - block with nested routes
+   * @tparam C - you controller
+   * @tparam M - you model
+   * @return [[Route]]
+   */
   def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
+
+  /** Define routes without excluded actions, and nested block
+   *  {{{
+   *    resourse[Controller, Model](exclude("index"), {
+   *      get0[Controller]("other")
+   *    })
+   *  }}}
+   * @param exclude - excluded actions
+   * @param block [[Route]] - nested block
+   * @tparam C - you controller
+   * @tparam M - you model
+   * @return [[Route]]
+   */
   def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
+
+  /** Simple define routes
+   * {{{
+   *   resourse[Controller, Model]
+   * }}}
+   * @tparam C - you controller
+   * @tparam M - you model
+   * @return [[Route]]
+   */
   def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
 }
 
-
+/** Object, which contatain resourse implementation.
+ *
+ */
 object RoutableImpl {
   import spray.routing.Route
 
