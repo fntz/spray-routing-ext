@@ -8,7 +8,6 @@ import spray.routing.PathMatcher
 trait Helpers {
   implicit class S2A(path: String) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.aliasImpl
-    def :->(str: String*): (String, List[String]) = macro HelpersImpl.assocImpl
   }
   implicit class PM2A(pm: PathMatcher[_ <: HList]) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.aliasImpl
