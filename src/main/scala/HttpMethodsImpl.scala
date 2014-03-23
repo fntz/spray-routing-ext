@@ -16,7 +16,7 @@ trait HttpMethods {
   /**
    * Take an action which use as route path.
    *
-   * @param action [[String]] use as route and as method for controller
+   * @param action use as route and as method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -25,7 +25,7 @@ trait HttpMethods {
   /**
    * Take an action which use as route path.
    *
-   * @param action [[String]] use as route and as method for controller
+   * @param action  use as route and as method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -34,7 +34,7 @@ trait HttpMethods {
   /**
    * Take an action which use as route path.
    *
-   * @param action [[String]] use as route and as method for controller
+   * @param action use as route and as method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -43,7 +43,7 @@ trait HttpMethods {
   /**
    * Take an action which use as route path.
    *
-   * @param action [[String]] use as route and as method for controller
+   * @param action use as route and as method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -62,7 +62,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -81,7 +81,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -100,7 +100,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */
@@ -119,7 +119,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * @param tuple [[(PathMathcer[_ <: HList), String]] path and method for controller
+   * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
    */

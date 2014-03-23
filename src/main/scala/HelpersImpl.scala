@@ -6,13 +6,13 @@ import shapeless.HList
 import spray.routing.PathMatcher
 
 
-  /**
-   * Provides implicits for [[String]] and [[spray.routing.PathMatcher]]
-   * {{{
-   *   get0[Controller]("index" ~> "my_index_method")
-   *   get0[Controller](("show" / IntNumer) ~> "my_show_method")
-   * }}}
-   */
+/**
+ * Provides implicits for String and spray.routing.PathMatcher
+ * {{{
+ *   get0[Controller]("index" ~> "my_index_method")
+ *   get0[Controller](("show" / IntNumer) ~> "my_show_method")
+ * }}}
+ */
 trait Helpers {
   implicit class S2A(path: String) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.aliasImpl
@@ -26,11 +26,7 @@ trait Helpers {
    *  Containt macros for [[spray.routing.ext.Helpers]]
    */
 object HelpersImpl {
-    /**
-     * @param c - Context
-     * @param action - c.Expr[String]
-     * @return [[(PathMatcher[_ <: HList], String)]]
-     */
+
   def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
     import c.universe._
 

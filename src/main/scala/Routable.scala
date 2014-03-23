@@ -7,7 +7,7 @@ import spray.routing._
 import scala.language.implicitConversions
 
 /**
- * Object for transformation String* into [[List]]
+ * Object for transformation String* into List
  * {{{
  *   exclude("index")
  * }}}
@@ -16,7 +16,8 @@ object exclude {
   def apply(xs: String*) = xs.toList
 }
 
-/** Trait contatin methods for resourse implementation.
+/**
+ * Trait contatin methods for resourse implementation.
  *  With resourse method you might quick create routes for you controller. Also map form information onto Model.
  *  {{{
  *    resourse[Controller, Model]
@@ -28,7 +29,7 @@ object exclude {
  *      // controller.show
  *      // ...
  *    }
- *
+ *   }}}
  * Note: for `new` method in controller use `fresh` name.
  */
 trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {

@@ -30,7 +30,7 @@ trait BaseController {
   /**
    * When controller created, it method contain current request object.
    *
-   * @return [[spray.http.HttpRequest]]
+   * @return spray.http.HttpRequest
    */
   def request: spray.http.HttpRequest
 }

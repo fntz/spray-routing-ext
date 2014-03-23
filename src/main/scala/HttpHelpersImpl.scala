@@ -13,7 +13,7 @@ import shapeless._
    */
 trait HttpHelpers {
   /**
-   * Take a method. And provide tranformation into route. By default use [[spray.http.HttpMethods.GET]] for request.
+   * Take a method. And provide tranformation into route. By default use spray.http.HttpMethods.GET for request.
    * {{{
    *   match0[Contoller]("index")
    * }}}
@@ -25,7 +25,7 @@ trait HttpHelpers {
    *     }
    *   }
    * }}}
-   * @param action [[String]] information about method. This method will be use as route path.
+   * @param action information about method. This method will be use as route path.
    * @tparam C - you controller type
    * @return [[Route]]
    */
@@ -47,15 +47,15 @@ trait HttpHelpers {
    *      }
    *    }
    *  }}}
-   * @param action: [[String]] use as method from controller and path for request.
-   * @param via: [[List[spray.http.HttpMethod]]] - a list with http methods for handle request.
+   * @param action - use as method from controller and path for request.
+   * @param via - a list with http methods for handle request.
    * @tparam C: you controller type
    * @return [[Route]]
    */
   def match0[C](action: String, via: List[HttpMethod])                           = macro HttpHelpersImpl.match02[C]
 
   /**
-   * Take a path with method for handle request. By default use [[spray.http.HttpMethods.GET]] for http method.
+   * Take a path with method for handle request. By default use spray.http.HttpMethods.GET for http method.
    * {{{
    *   match0[Controller](("show" / IntNumber) ~> "my_show")
    * }}}
@@ -90,8 +90,8 @@ trait HttpHelpers {
    *   }
    * }}}
    *
-   * @param tuple [[(PathMatcher[_ <: HList], String)]] path with method for handle request.
-   * @param via [[List[spray.http.HttpMethod]]] - a list with http methods for handle request.
+   * @param tuple path with method for handle request.
+   * @param via - a list with http methods for handle request.
    * @tparam C - you controller type
    * @return [[Route]]
    */
@@ -126,8 +126,8 @@ trait HttpHelpers {
    *     //you block
    *   }
    * }}}
-   * @param path [[String]] string for path
-   * @param block [[Route]]
+   * @param path string for path
+   * @param block - block of routes
    * @return [[Route]]
    */
   def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
