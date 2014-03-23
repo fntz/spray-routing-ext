@@ -1,3 +1,4 @@
+package spray.routing.ext
 
 import scala.language.experimental.macros
 import scala.reflect.macros.Context

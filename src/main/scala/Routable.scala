@@ -1,3 +1,4 @@
+package spray.routing.ext
 
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
@@ -9,7 +10,6 @@ import scala.language.implicitConversions
 object exclude {
   def apply(xs: String*) = xs.toList
 }
-
 
 trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
   def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
