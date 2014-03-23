@@ -116,14 +116,14 @@ trait Controller3 extends BaseController {
 trait ResorseTestable extends Routable {
 
   val route =
-   resourse[Controller0, Model0](List[String](), {
+   resourse[Controller0, Model0](exclude(), {
       pathPrefix("foo") {
         get {
           complete{"bar"}
         }
       }
      }) ~
-   resourse[Controller1, Model1](List("index", "edit", "delete", "create", "update", "show")) ~
+   resourse[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show")) ~
    resourse[Controller2, Model2]({
      get0[Controller2]("index")
    }) ~
@@ -244,9 +244,6 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       }
     }
   }
-
-
-
 }
 
 

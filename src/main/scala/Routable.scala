@@ -4,9 +4,14 @@ import scala.reflect.macros.Context
 
 import spray.routing._
 import scala.language.implicitConversions
-//TODO: Listr[String] ~> String* ; config as exclude
-trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
 
+
+object exclude {
+  def apply(xs: String*) = xs.toList
+}
+
+
+trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
   def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
   def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
   def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]

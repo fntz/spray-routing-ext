@@ -7,16 +7,12 @@ import spray.http._
 import shapeless._
 
 trait HttpHelpers {
-  //match0[C]("path" ~> "method")
-  //match0[C]("path-method", via)
-  //match0[C]("path-methpd") //default with GET
-  //match0[C]("path" ~> "method", List(GET))
   def match0[C](action: String)                                                  = macro HttpHelpersImpl.match01[C]
   def match0[C](action: String, via: List[HttpMethod])                           = macro HttpHelpersImpl.match02[C]
   def match0[C](tuple: (PathMatcher[_ <: HList], String))                        = macro HttpHelpersImpl.match03[C]
   def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro HttpHelpersImpl.match0Impl[C]
 
-  def root[C](action: String) = macro HttpHelpersImpl.rootImpl[C]
+  def root[C](action: String)           = macro HttpHelpersImpl.rootImpl[C]
 
   def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
 }
