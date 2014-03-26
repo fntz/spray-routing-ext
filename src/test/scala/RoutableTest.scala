@@ -1,6 +1,6 @@
 package spray.routing.ext
 import org.scalatest._
-import spray.http.{FormData}
+import spray.http.{RequestProcessingException, FormData}
 import spray.routing.HttpService._
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
@@ -11,6 +11,7 @@ case class Model0(id: Int, title: String)
 case class Model1(id: Int)
 case class Model2(title: String)
 case class Model3(id: Int)
+case class Model4(id: Int, title: String)
 
 trait Controller0 extends BaseController {
   import HttpService._
@@ -113,6 +114,40 @@ trait Controller3 extends BaseController {
 }
 
 
+trait Controller4 extends BaseController {
+  import HttpService._
+
+  def index = {
+    complete{"index"}
+  }
+
+  def show(id: Int) = {
+    complete{s"show${id}"}
+  }
+
+  def update(id: Int) = {
+    complete{s"update$id"}
+  }
+
+  def edit(id: Int) = {
+    complete{s"edit$id"}
+  }
+
+  def delete(id: Int)= {
+    complete{s"delete$id"}
+  }
+
+  def create(model: Model4) = {
+    complete{s"create ${model.id}"}
+  }
+
+  def fresh = {
+    complete{"fresh"}
+  }
+}
+
+
+
 trait ResorseTestable extends Routable {
 
   val route =
@@ -128,6 +163,8 @@ trait ResorseTestable extends Routable {
      get0[Controller2]("index")
    }) ~
    resourse[Controller3, Model3]
+
+ val route1 = resourse[Controller4, Model4]
 
 }
 

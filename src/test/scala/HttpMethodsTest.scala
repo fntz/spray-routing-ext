@@ -31,14 +31,23 @@ trait HttpMethodsController extends BaseController {
       complete{"custom"}
     }
   }
+
+  def bar = {
+    complete{"bar"}
+  }
 }
 
+
+
 trait HttpMethodsTestable extends Routable {
-  val route  = get0[HttpMethodsController](("foo" / IntNumber) ~> "foo") ~
+   val route  = get0[HttpMethodsController](("foo" / IntNumber) ~> "foo") ~
     get0[HttpMethodsController](("foo" / Segment) ~> "foo0") ~
     get0[HttpMethodsController]("foo" ~> "foo1") ~
     get0[HttpMethodsController]("baz") ~
-    get0[HttpMethodsController]("custom")
+    get0[HttpMethodsController]("custom") ~
+    put0[HttpMethodsController]("bar")
+
+
 }
 
 class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with HttpMethodsTestable {
@@ -75,7 +84,20 @@ class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with
         responseAs[String] should startWith("custom")
       }
     }
+  }
 
+  describe("emulate methods") {
+    it("put with post") {
+      Put("/bar") ~> route ~> check {
+        responseAs[String] should startWith("bar")
+      }
+      Post("/bar", FormData(Seq("_method" -> "put"))) ~> route ~> check {
+        responseAs[String] should startWith("bar")
+      }
+      Post("/bar", FormData(Seq("_method" -> "delete"))) ~> route ~> check {
+        (status === spray.http.StatusCodes.BadRequest) should be(true)
+      }
+    }
   }
 }
 

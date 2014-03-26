@@ -100,6 +100,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
+   * Note: With this method created post method, which take a hidden field _method, and processing request
    * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
@@ -119,6 +120,7 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
+   * Note: With this method created post method, which take a hidden field _method, and processing request
    * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
@@ -162,26 +164,26 @@ object HttpMethodsImpl {
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.GET)
+    methodImpl[C](c)(tuple, HttpMethods.GET, HttpMethods.GET)
   }
 
   def post0Impl[C: c.WeakTypeTag](c: Context)
                                  (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.POST)
+    methodImpl[C](c)(tuple, HttpMethods.POST, HttpMethods.POST)
   }
 
   def put0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.PUT)
+    methodImpl[C](c)(tuple, HttpMethods.PUT, HttpMethods.POST)
   }
 
   def delete0Impl[C: c.WeakTypeTag](c: Context)
                                    (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.DELETE)
+    methodImpl[C](c)(tuple, HttpMethods.DELETE, HttpMethods.POST)
   }
 
   def methodImpl[C: c.WeakTypeTag](c: Context)
-                                  (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod): c.Expr[Route] = {
+                (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod, emulateWith: HttpMethod): c.Expr[Route] = {
     import c.universe._
 
     val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
@@ -215,7 +217,41 @@ object HttpMethodsImpl {
       case x => Ident(newTermName(s"tmp$x"))
     }.toList
 
-    val httpMethod = newTermName(mth.toString.toLowerCase)
+    val emulate = emulateWith.toString.toLowerCase
+    val plain = mth.toString.toLowerCase
+    val httpMethod    = newTermName(plain)
+    val emulateMethod = newTermName(emulate)
+
+
+    val complete = if (count != 0) {
+      q"controller.$method(..$vals)"
+    } else {
+      q"controller.$method"
+    }
+
+    val mainRoute = q"""
+      $httpMethod {
+        $complete
+      }
+    """
+
+    val result = if (mth != emulateWith) {
+      q"""
+        $mainRoute ~
+        $emulateMethod {
+          anyParam('_method.?) { method: Option[String] =>
+            method match {
+              case Some(x) if x == $plain =>
+                $complete
+              case _ =>
+                failWith(new spray.http.IllegalRequestException(spray.http.StatusCodes.BadRequest))
+            }
+          }
+        }
+      """
+    } else {
+      mainRoute
+    }
 
     val route = if (count != 0) {
       q"""
@@ -224,9 +260,7 @@ object HttpMethodsImpl {
             val controller = new ${c.weakTypeOf[C]}{
               def request = request0
             }
-            $httpMethod {
-              controller.$method(..$vals)
-            }
+            $result
           }
         }
       """
@@ -237,9 +271,7 @@ object HttpMethodsImpl {
             val controller = new ${c.weakTypeOf[C]}{
               def request = request0
             }
-            $httpMethod {
-              controller.$method
-            }
+            $result
           }
         }
       """
@@ -248,5 +280,3 @@ object HttpMethodsImpl {
     c.Expr[Route](route)
   }
 }
-
-

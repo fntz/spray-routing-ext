@@ -69,7 +69,7 @@ class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with
         handled should be(false)
       }
       Post("/scope/baz0") ~> route ~> check {
-        handled should be(false)
+        (status === spray.http.StatusCodes.BadRequest) should be(true)
       }
     }
 
@@ -81,7 +81,7 @@ class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with
         handled should be(false)
       }
       Post("/scope/baz0") ~> route ~> check {
-        handled should be(false)
+        (status === spray.http.StatusCodes.BadRequest) should be(true)
       }
       Put("/scope/baz0") ~> route ~> check {
         responseAs[String] should startWith("baz")
