@@ -3,7 +3,7 @@ import sbt.Keys._
 
 object SprayRoutingExtBuild extends Build {
 
-  lazy val bookmarks = Project(
+  lazy val mainProject = Project(
     id = "spray-routing-ext",
     base = file("."),
     settings = Project.defaultSettings ++ Seq(
