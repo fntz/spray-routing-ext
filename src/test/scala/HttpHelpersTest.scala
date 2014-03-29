@@ -39,7 +39,6 @@ trait HttpHelpersTestable extends Routable {
 
 }
 
-
 class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with HttpHelpersTestable {
   def actorRefFactory = system
 

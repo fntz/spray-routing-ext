@@ -253,13 +253,13 @@ object HttpMethodsImpl {
       mainRoute
     }
 
+    //TODO: generate class name on fly
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
           requestInstance { request0 =>
-            val controller = new ${c.weakTypeOf[C]}{
-              def request = request0
-            }
+            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(request0)
             $result
           }
         }
@@ -268,9 +268,8 @@ object HttpMethodsImpl {
       q"""
         pathPrefix($pm) {
           requestInstance { request0 =>
-            val controller = new ${c.weakTypeOf[C]}{
-              def request = request0
-            }
+            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(request0)
             $result
           }
         }

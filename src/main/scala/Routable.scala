@@ -185,9 +185,8 @@ object RoutableImpl {
     val create = q"""
       requestInstance { request0 =>
         post {
-            val controller = new ${c.weakTypeOf[C]}{
-              def request = request0
-            }
+            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(request0)
 
             formFields(..$extract).as($model) { (model) =>
               controller.create(model)
