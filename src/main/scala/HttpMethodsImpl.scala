@@ -253,13 +253,40 @@ object HttpMethodsImpl {
       mainRoute
     }
 
+    val outerMethod = c.enclosingMethod
+
+    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
+
+      val vs = (outerMethod match {
+        case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs
+      }).asInstanceOf[List[ValDef]]
+
+      val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
+      val requestVal = List(q"val request: spray.http.HttpRequest")
+
+      val sum = requestVal ++ vvs
+
+      val tmpNames = List("request0") ++ vs.map{x => s"${x.name}"}
+
+      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      (sum, names)
+    } else {
+      val requestVal = List(q"val request: spray.http.HttpRequest")
+      val sum = requestVal
+
+      val tmpNames = List("request0")
+
+      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      (sum, names)
+    }
+
     //TODO: generate class name on fly
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
           requestInstance { request0 =>
-            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(request0)
+            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(..$names)
             $result
           }
         }
@@ -268,8 +295,8 @@ object HttpMethodsImpl {
       q"""
         pathPrefix($pm) {
           requestInstance { request0 =>
-            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(request0)
+            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(..$names)
             $result
           }
         }
