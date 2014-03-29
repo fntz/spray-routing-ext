@@ -153,27 +153,8 @@ object HttpHelpersImpl {
   def rootImpl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
     import c.universe._
 
-    val methodName = action.tree match {
-      case Literal(Constant(x)) => s"$x"
-    }
-
-    val method = c.weakTypeOf[C].declaration(newTermName(methodName))
-
-    if (method == NoSymbol) {
-      c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
-    }
-
     val route = q"""
-      path("") {
-        requestInstance { request0 =>
-          val controller = new ${c.weakTypeOf[C]}{
-            def request = request0
-          }
-          get {
-            controller.$method
-          }
-        }
-      }
+      get0[${c.weakTypeOf[C]}]("" ~> $action)
     """
     c.Expr[Route](route)
   }
