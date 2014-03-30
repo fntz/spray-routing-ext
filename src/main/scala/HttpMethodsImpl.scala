@@ -237,15 +237,10 @@ object HttpMethodsImpl {
 
     val result = if (mth != emulateWith) {
       q"""
-        $mainRoute ~
-        $emulateMethod {
-          anyParam('_method.?) { method: Option[String] =>
-            method match {
-              case Some(x) if x == $plain =>
-                $complete
-              case _ =>
-                failWith(new spray.http.IllegalRequestException(spray.http.StatusCodes.BadRequest))
-            }
+        overrideMethodWithParameter("_method") {
+          $mainRoute ~
+          $emulateMethod {
+            $complete
           }
         }
       """

@@ -169,6 +169,56 @@ trait ResorseTestable extends Routable {
 }
 
 
+
+trait AC extends BaseController {
+  def index = {
+    complete("index")
+  }
+}
+
+trait A extends Routable {
+  val route = pathPrefix("foo") {
+    overrideMethodWithParameter("_method") {
+      post {
+        complete("post")
+      } ~
+      put {
+        complete("put")
+      } ~
+      delete {
+        complete("delete")
+      }
+    }
+  }
+
+
+
+
+}
+
+class ZTest extends FunSpec with Matchers with ScalatestRouteTest with A {
+  def actorRefFactory = system
+
+  describe("das") {
+    it("asd") {
+      Post("/foo") ~> route ~> check {
+        println(responseAs[String])
+        responseAs[String] should be("post")
+      }
+      Post("/foo?_method=put") ~> route ~> check {
+        println(responseAs[String])
+        responseAs[String] should be("put")
+      }
+      Post("/foo?_method=delete") ~> route ~> check {
+        println(responseAs[String])
+        responseAs[String] should be("delete")
+      }
+    }
+  }
+
+}
+
+
 class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with ResorseTestable {
   def actorRefFactory = system
 
@@ -183,17 +233,23 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model0/1/show") ~> route ~> check{
         responseAs[String] should startWith("show1")
       }
-      Put("/model0/1/update") ~> route ~> check{
+      Put("/model0/1") ~> route ~> check{
         responseAs[String] should startWith("update1")
       }
-      Delete("/model0/1/delete") ~> route ~> check{
+      Delete("/model0/1") ~> route ~> check{
         responseAs[String] should startWith("delete1")
       }
       Get("/model0/new") ~> route ~> check{
         responseAs[String] should startWith("fresh")
       }
-      Post("/model0/create", FormData(Seq("id" -> "10", "title" -> "spray"))) ~> route ~> check{
+      Post("/model0", FormData(Seq("id" -> "10", "title" -> "spray"))) ~> route ~> check{
         responseAs[String] should startWith(s"create 10 - spray")
+      }
+      Post("/model0/1/?_method=put") ~> route ~> check {
+        responseAs[String] should startWith("update1")
+      }
+      Delete("/model0/1/?_method=delete") ~> route ~> check {
+        responseAs[String] should startWith("delete1")
       }
     }
 
@@ -207,13 +263,13 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model1/1/show") ~> route ~> check{
         handled should be(false)
       }
-      Put("/model1/1/update") ~> route ~> check{
+      Put("/model1/1") ~> route ~> check{
         handled should be(false)
       }
-      Delete("/model1/1/delete") ~> route ~> check{
+      Delete("/model1/1") ~> route ~> check{
         handled should be(false)
       }
-      Post("/model1/create", FormData(Seq("id" -> "10", "title" -> "spray"))) ~> route ~> check{
+      Post("/model1", FormData(Seq("id" -> "10", "title" -> "spray"))) ~> route ~> check{
         handled should be(false)
       }
       Get("/model1/new") ~> route ~> check{
@@ -231,16 +287,16 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model2/1/show") ~> route ~> check{
         responseAs[String] should startWith("show1")
       }
-      Put("/model2/1/update") ~> route ~> check{
+      Put("/model2/1") ~> route ~> check{
         responseAs[String] should startWith("update1")
       }
-      Delete("/model2/1/delete") ~> route ~> check{
+      Delete("/model2/1") ~> route ~> check{
         responseAs[String] should startWith("delete1")
       }
       Get("/model2/new") ~> route ~> check{
         responseAs[String] should startWith("fresh")
       }
-      Post("/model2/create", FormData(Seq("title" -> "spray"))) ~> route ~> check{
+      Post("/model2", FormData(Seq("title" -> "spray"))) ~> route ~> check{
         responseAs[String] should startWith(s"create spray")
       }
     }
@@ -255,10 +311,10 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model3/1/show") ~> route ~> check{
         responseAs[String] should startWith("show1")
       }
-      Put("/model3/1/update") ~> route ~> check{
+      Put("/model3/1") ~> route ~> check{
         responseAs[String] should startWith("update1")
       }
-      Delete("/model3/1/delete") ~> route ~> check{
+      Delete("/model3/1") ~> route ~> check{
         responseAs[String] should startWith("delete1")
       }
       Get("/model3/new") ~> route ~> check{

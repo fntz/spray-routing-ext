@@ -178,7 +178,7 @@ object RoutableImpl {
     val controller = c.weakTypeOf[C]
 
     val show   = q"""get0[$controller](IntNumber ~> "show")"""
-    val index  = q"""get0[$controller]("index")"""
+    val index  = q"""get0[$controller]("index")""" //FIXME: should  be end path
     val edit   = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
     val update = q"""put0[$controller](IntNumber ~> "update")"""
     val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
@@ -227,7 +227,7 @@ object RoutableImpl {
     val fresh = q"""get0[$controller]("new" ~> "fresh")"""
 
     val originalActions = List(
-      ("delete", delete), ("edit", edit), ("show", show), ("update", update), ("new", fresh), ("create", create), ("index", index)
+      ("delete", delete), ("update", update), ("edit", edit), ("show", show), ("new", fresh), ("create", create), ("index", index)
     )
 
     val excludeActions = originalActions.filter { x => list.contains(x._1)}
@@ -235,6 +235,7 @@ object RoutableImpl {
     val resultRoute = (originalActions diff excludeActions) map(_._2)
 
     val route = resultRoute.reduce((a,b) => q"$a ~ $b")
+    //println(route)
     c.Expr[Route](q"$route")
   }
 

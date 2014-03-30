@@ -6,7 +6,6 @@ import spray.routing._
 import spray.http.HttpHeaders._
 
 
-
 trait HttpMethodsController extends BaseController {
   import HttpService._
 
@@ -91,11 +90,11 @@ class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with
       Put("/bar") ~> route ~> check {
         responseAs[String] should startWith("bar")
       }
-      Post("/bar", FormData(Seq("_method" -> "put"))) ~> route ~> check {
+      Post("/bar?_method=put") ~> route ~> check {
         responseAs[String] should startWith("bar")
       }
-      Post("/bar", FormData(Seq("_method" -> "delete"))) ~> route ~> check {
-        (status === spray.http.StatusCodes.BadRequest) should be(true)
+      Post("/bar?_method=delete") ~> route ~> check {
+        handled should be(false)
       }
     }
   }

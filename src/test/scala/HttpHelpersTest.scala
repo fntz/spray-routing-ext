@@ -67,9 +67,6 @@ class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with
       Delete("/scope/baz0") ~> route ~> check {
         handled should be(false)
       }
-      Post("/scope/baz0") ~> route ~> check {
-        (status === spray.http.StatusCodes.BadRequest) should be(true)
-      }
     }
 
     it("should handle with GET by default and only action name as path") {
@@ -78,9 +75,6 @@ class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with
       }
       Delete("/scope/baz") ~> route ~> check {
         handled should be(false)
-      }
-      Post("/scope/baz0") ~> route ~> check {
-        (status === spray.http.StatusCodes.BadRequest) should be(true)
       }
       Put("/scope/baz0") ~> route ~> check {
         responseAs[String] should startWith("baz")
