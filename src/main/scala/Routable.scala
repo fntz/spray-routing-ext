@@ -227,7 +227,7 @@ object RoutableImpl {
     val fresh = q"""get0[$controller]("new" ~> "fresh")"""
 
     val originalActions = List(
-      ("delete", delete), ("update", update), ("edit", edit), ("show", show), ("new", fresh), ("create", create), ("index", index)
+      ("edit", edit), ("show", show), ("delete", delete), ("update", update), ("new", fresh), ("create", create), ("index", index)
     )
 
     val excludeActions = originalActions.filter { x => list.contains(x._1)}
