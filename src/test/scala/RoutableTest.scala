@@ -170,55 +170,6 @@ trait ResorseTestable extends Routable {
 
 
 
-trait AC extends BaseController {
-  def index = {
-    complete("index")
-  }
-}
-
-trait A extends Routable {
-  val route = pathPrefix("foo") {
-    overrideMethodWithParameter("_method") {
-      post {
-        complete("post")
-      } ~
-      put {
-        complete("put")
-      } ~
-      delete {
-        complete("delete")
-      }
-    }
-  }
-
-
-
-
-}
-
-class ZTest extends FunSpec with Matchers with ScalatestRouteTest with A {
-  def actorRefFactory = system
-
-  describe("das") {
-    it("asd") {
-      Post("/foo") ~> route ~> check {
-        println(responseAs[String])
-        responseAs[String] should be("post")
-      }
-      Post("/foo?_method=put") ~> route ~> check {
-        println(responseAs[String])
-        responseAs[String] should be("put")
-      }
-      Post("/foo?_method=delete") ~> route ~> check {
-        println(responseAs[String])
-        responseAs[String] should be("delete")
-      }
-    }
-  }
-
-}
-
-
 class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with ResorseTestable {
   def actorRefFactory = system
 
