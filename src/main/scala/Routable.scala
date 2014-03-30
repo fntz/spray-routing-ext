@@ -182,11 +182,40 @@ object RoutableImpl {
     val edit   = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
     val update = q"""put0[$controller](IntNumber ~> "update")"""
     val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
+
+
+    //Refactor this, ~> htt
+    val outerMethod = c.enclosingMethod
+
+    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
+        val vs = (outerMethod match {
+          case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs
+        }).asInstanceOf[List[ValDef]]
+
+        val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
+        val requestVal = List(q"val request: spray.http.HttpRequest")
+
+        val sum = requestVal ++ vvs
+
+        val tmpNames = List("request0") ++ vs.map{x => s"${x.name}"}
+
+        val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+        (sum, names)
+      } else {
+        val requestVal = List(q"val request: spray.http.HttpRequest")
+        val sum = requestVal
+
+        val tmpNames = List("request0")
+
+        val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+
+        (sum, names)
+    }
     val create = q"""
       requestInstance { request0 =>
         post {
-            case class AnonClassController(request: spray.http.HttpRequest) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(request0)
+            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(..$names)
 
             formFields(..$extract).as($model) { (model) =>
               controller.create(model)
@@ -198,7 +227,7 @@ object RoutableImpl {
     val fresh = q"""get0[$controller]("new" ~> "fresh")"""
 
     val originalActions = List(
-      ("edit", edit), ("show", show), ("update", update), ("delete", delete), ("new", fresh), ("create", create), ("index", index)
+      ("delete", delete), ("edit", edit), ("show", show), ("update", update), ("new", fresh), ("create", create), ("index", index)
     )
 
     val excludeActions = originalActions.filter { x => list.contains(x._1)}
