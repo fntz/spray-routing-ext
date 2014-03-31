@@ -100,7 +100,6 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * Note: With this method created post method, which take a hidden field _method, and processing request
    * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
@@ -120,7 +119,6 @@ trait HttpMethods {
    *     }
    *   }
    * }}}
-   * Note: With this method created post method, which take a hidden field _method, and processing request
    * @param tuple path and method for controller
    * @tparam C - your controller
    * @return [[Route]]
@@ -164,26 +162,26 @@ object HttpMethodsImpl {
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.GET, HttpMethods.GET)
+    methodImpl[C](c)(tuple, HttpMethods.GET)
   }
 
   def post0Impl[C: c.WeakTypeTag](c: Context)
                                  (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.POST, HttpMethods.POST)
+    methodImpl[C](c)(tuple, HttpMethods.POST)
   }
 
   def put0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.PUT, HttpMethods.POST)
+    methodImpl[C](c)(tuple, HttpMethods.PUT)
   }
 
   def delete0Impl[C: c.WeakTypeTag](c: Context)
                                    (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    methodImpl[C](c)(tuple, HttpMethods.DELETE, HttpMethods.POST)
+    methodImpl[C](c)(tuple, HttpMethods.DELETE)
   }
 
   def methodImpl[C: c.WeakTypeTag](c: Context)
-                (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod, emulateWith: HttpMethod): c.Expr[Route] = {
+                (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod): c.Expr[Route] = {
     import c.universe._
 
     val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
@@ -217,11 +215,8 @@ object HttpMethodsImpl {
       case x => Ident(newTermName(s"tmp$x"))
     }.toList
 
-    val emulate = emulateWith.toString.toLowerCase
     val plain = mth.toString.toLowerCase
     val httpMethod    = newTermName(plain)
-    val emulateMethod = newTermName(emulate)
-
 
     val complete = if (count != 0) {
       q"controller.$method(..$vals)"
@@ -235,20 +230,8 @@ object HttpMethodsImpl {
       }
     """
 
-    val result = if (mth != emulateWith) {
-      q"""
-        overrideMethodWithParameter("_method") {
-          $mainRoute ~
-          $emulateMethod {
-            $complete
-          }
-        }
-      """
-    } else {
-      mainRoute
-    }
-
     val outerMethod = c.enclosingMethod
+    val requestVal = List(q"val request: spray.http.HttpRequest")
 
     val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
 
@@ -257,7 +240,6 @@ object HttpMethodsImpl {
       }).asInstanceOf[List[ValDef]]
 
       val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
-      val requestVal = List(q"val request: spray.http.HttpRequest")
 
       val sum = requestVal ++ vvs
 
@@ -266,7 +248,6 @@ object HttpMethodsImpl {
       val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
       (sum, names)
     } else {
-      val requestVal = List(q"val request: spray.http.HttpRequest")
       val sum = requestVal
 
       val tmpNames = List("request0")
@@ -282,7 +263,7 @@ object HttpMethodsImpl {
           requestInstance { request0 =>
             case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
             val controller = new AnonClassController(..$names)
-            $result
+            $mainRoute
           }
         }
       """
@@ -292,7 +273,7 @@ object HttpMethodsImpl {
           requestInstance { request0 =>
             case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
             val controller = new AnonClassController(..$names)
-            $result
+            $mainRoute
           }
         }
       """

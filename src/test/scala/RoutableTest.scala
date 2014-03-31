@@ -169,7 +169,6 @@ trait ResorseTestable extends Routable {
 }
 
 
-
 class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with ResorseTestable {
   def actorRefFactory = system
 
@@ -196,12 +195,13 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Post("/model0", FormData(Seq("id" -> "10", "title" -> "spray"))) ~> route ~> check{
         responseAs[String] should startWith(s"create 10 - spray")
       }
-      Post("/model0/1/?_method=put") ~> route ~> check {
-        responseAs[String] should startWith("update1")
-      }
       Post("/model0/1/?_method=delete") ~> route ~> check {
         responseAs[String] should startWith("delete1")
       }
+      Post("/model0/1/?_method=put") ~> route ~> check {
+        responseAs[String] should startWith("update1")
+      }
+
     }
 
     it ("when exclude non empty") {

@@ -43,10 +43,7 @@ trait HttpMethodsTestable extends Routable {
     get0[HttpMethodsController](("foo" / Segment) ~> "foo0") ~
     get0[HttpMethodsController]("foo" ~> "foo1") ~
     get0[HttpMethodsController]("baz") ~
-    get0[HttpMethodsController]("custom") ~
-    put0[HttpMethodsController]("bar")
-
-
+    get0[HttpMethodsController]("custom") 
 }
 
 class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with HttpMethodsTestable {
@@ -81,20 +78,6 @@ class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with
       Get("/custom") ~> route ~> check {
         headers.filter(_.is("mysuperheader")) === List(RawHeader("MySuperHeader", "wow"))
         responseAs[String] should startWith("custom")
-      }
-    }
-  }
-
-  describe("emulate methods") {
-    it("put with post") {
-      Put("/bar") ~> route ~> check {
-        responseAs[String] should startWith("bar")
-      }
-      Post("/bar?_method=put") ~> route ~> check {
-        responseAs[String] should startWith("bar")
-      }
-      Post("/bar?_method=delete") ~> route ~> check {
-        handled should be(false)
       }
     }
   }
