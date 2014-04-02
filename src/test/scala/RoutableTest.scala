@@ -157,17 +157,17 @@ trait ResorseTestable extends Routable {
           complete{"bar"}
         }
       }
-     }) ~
-   resourse[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show")) ~
+     }) /*~
+   resourse[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show"))  ~
    resourse[Controller2, Model2]({
      get0[Controller2]("index")
    }) ~
    resourse[Controller3, Model3]
 
- val route1 = resourse[Controller4, Model4]
+  val route1 = resourse[Controller4, Model4]
+*/
 
 }
-
 
 class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with ResorseTestable {
   def actorRefFactory = system
@@ -180,7 +180,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model0/1/edit") ~> route ~> check{
         responseAs[String] should startWith("edit1")
       }
-      Get("/model0/1/show") ~> route ~> check{
+      Get("/model0/1") ~> route ~> check{
         responseAs[String] should startWith("show1")
       }
       Put("/model0/1") ~> route ~> check{
@@ -203,7 +203,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       }
 
     }
-
+/*
     it ("when exclude non empty") {
       Get("/model1/index") ~> route ~> check{
         handled should be(false)
@@ -211,7 +211,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model1/1/edit") ~> route ~> check{
         handled should be(false)
       }
-      Get("/model1/1/show") ~> route ~> check{
+      Get("/model1/1") ~> route ~> check{
         handled should be(false)
       }
       Put("/model1/1") ~> route ~> check{
@@ -286,7 +286,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model2/index") ~> route ~> check {
         responseAs[String] should startWith("index")
       }
-    }
+    } */
   }
 }
 

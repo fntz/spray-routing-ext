@@ -112,11 +112,17 @@ object RoutableImpl {
 
     val result = getRoute[C, M](c)(exclude)
 
-    val route = q"""
-      pathPrefix($startPath) {
-          $result
-        }
-    """
+    val route = result match {
+      case Some(x) =>
+        q"""
+          pathPrefix($startPath) {
+            $x
+          }
+        """
+      case None =>
+        c.error(c.enclosingPosition, s"resourse should have a Route type")
+        q""" get{complete{"123"}} """
+    }
 
     c.Expr[Route](route)
   }
@@ -128,12 +134,22 @@ object RoutableImpl {
 
     val result = getRoute[C, M](c)(exclude)
 
-    val route = q"""
-      pathPrefix($startPath) {
-          $result ~
-          $block
-        }
-    """
+    val route = result match {
+      case Some(x) =>
+        q"""
+          pathPrefix($startPath) {
+            $x ~
+            $block
+          }
+        """
+      case None =>
+        q"""
+          pathPrefix($startPath) {
+            $block
+          }
+        """
+    }
+
 
     c.Expr[Route](route)
   }
@@ -145,7 +161,7 @@ object RoutableImpl {
   }
 
   private def getRoute[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-              (exclude: c.Expr[List[String]]): c.Expr[Route] = {
+              (exclude: c.Expr[List[String]]):Option[c.Expr[Route]] = {
     import c.universe._
 
     val params = c.weakTypeOf[M].declarations.collect {
@@ -184,7 +200,9 @@ object RoutableImpl {
     val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
 
 
-    //Refactor this, ~> htt
+    //Refactor this, ~> httpMethods
+    val requestVal = List(q"val request: spray.http.HttpRequest")
+
     val outerMethod = c.enclosingMethod
 
     val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
@@ -193,7 +211,6 @@ object RoutableImpl {
         }).asInstanceOf[List[ValDef]]
 
         val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
-        val requestVal = List(q"val request: spray.http.HttpRequest")
 
         val sum = requestVal ++ vvs
 
@@ -202,7 +219,6 @@ object RoutableImpl {
         val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
         (sum, names)
       } else {
-        val requestVal = List(q"val request: spray.http.HttpRequest")
         val sum = requestVal
 
         val tmpNames = List("request0")
@@ -211,32 +227,71 @@ object RoutableImpl {
 
         (sum, names)
     }
+    //Refactor this.
     val create = q"""
       requestInstance { request0 =>
         post {
-            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(..$names)
+          case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+          val controller = new AnonClassController(..$names)
 
-            formFields(..$extract).as($model) { (model) =>
-              controller.create(model)
-            }
+          formFields(..$extract).as($model) { (model) =>
+            controller.create(model)
           }
+        }
       }
     """
 
     val fresh = q"""get0[$controller]("new" ~> "fresh")"""
 
-    val originalActions = List(
-      ("edit", edit), ("show", show), ("delete", delete), ("update", update), ("new", fresh), ("create", create), ("index", index)
+    val original0 = List(
+      ("new", fresh), ("index", index), ("create", create)
     )
 
-    val excludeActions = originalActions.filter { x => list.contains(x._1)}
+    val original1 = List(
+      ("edit", edit), ("show", show), ("delete", delete), ("update", update)
+    )
 
-    val resultRoute = (originalActions diff excludeActions) map(_._2)
+    val exclude0 = original0.filter { x => list.contains(x._1)}
+    val exclude1 = original1.filter { x => list.contains(x._1)}
 
-    val route = resultRoute.reduce((a,b) => q"$a ~ $b")
-    //println(route)
-    c.Expr[Route](q"$route")
+    val resultForBlock = (original1 diff exclude0) map(_._2)
+    val resultOutBlock = (original0 diff exclude1) map(_._2)
+
+    val route0 = if(resultForBlock.isEmpty) {
+      None
+    } else {
+      val sum = resultForBlock.reduce((a,b) => q"$a ~ $b")
+      Some(q"""
+        overrideMethodWithParameter("_method") {
+          $sum
+        }
+      """)
+    }
+
+    val route1 = if(resultOutBlock.isEmpty) {
+      None
+    } else {
+      Some(resultOutBlock.reduce((a,b) => q"$a ~ $b"))
+    }
+
+    val route = (route0, route1) match {
+      case (Some(a), Some(b)) => Some(c.Expr[Route](q"$a ~ $b"))
+      case (Some(a), None) => Some(c.Expr[Route](q"$a"))
+      case (None, Some(a)) => Some(c.Expr[Route](q"$a"))
+      case (None, None) => None
+    }
+
+    route
   }
 
 }
+
+
+
+
+
+
+
+
+
+

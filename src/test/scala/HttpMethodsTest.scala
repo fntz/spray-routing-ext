@@ -43,7 +43,7 @@ trait HttpMethodsTestable extends Routable {
     get0[HttpMethodsController](("foo" / Segment) ~> "foo0") ~
     get0[HttpMethodsController]("foo" ~> "foo1") ~
     get0[HttpMethodsController]("baz") ~
-    get0[HttpMethodsController]("custom") 
+    get0[HttpMethodsController]("custom")
 }
 
 class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with HttpMethodsTestable {
