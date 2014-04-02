@@ -200,7 +200,12 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Post("/model0/1/?_method=put") ~> route ~> check {
         responseAs[String] should startWith("update1")
       }
-
+      Get("/model0/1/?_method=delete") ~> route ~> check {
+        responseAs[String] should startWith("delete1")
+      }
+      Get("/model0/1/?_method=put") ~> route ~> check {
+        responseAs[String] should startWith("update1")
+      }
     }
 
     it ("when exclude non empty") {

@@ -194,7 +194,7 @@ object RoutableImpl {
     val controller = c.weakTypeOf[C]
 
     val show   = q"""get0[$controller](IntNumber ~> "show")"""
-    val index  = q"""get0[$controller]("index")""" //FIXME: should  be end path
+    val index  = q"""get0[$controller]("index")"""
     val edit   = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
     val update = q"""put0[$controller](IntNumber ~> "update")"""
     val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
@@ -229,8 +229,8 @@ object RoutableImpl {
     }
     //Refactor this.
     val create = q"""
-      requestInstance { request0 =>
-        post {
+      post {
+        requestInstance { request0 =>
           case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
           val controller = new AnonClassController(..$names)
 
@@ -248,7 +248,7 @@ object RoutableImpl {
     )
 
     val original1 = List(
-      ("edit", edit), ("show", show), ("delete", delete), ("update", update)
+      ("edit", edit), ("show", show), ("update", update), ("delete", delete)
     )
 
     val exclude0 = original0.filter { x => list.contains(x._1)}

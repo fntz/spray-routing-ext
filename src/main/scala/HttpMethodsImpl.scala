@@ -260,20 +260,24 @@ object HttpMethodsImpl {
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
-          requestInstance { request0 =>
-            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(..$names)
-            $mainRoute
+          $httpMethod {
+            requestInstance { request0 =>
+              case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+              val controller = new AnonClassController(..$names)
+              $complete
+            }
           }
         }
       """
     } else {
       q"""
         pathPrefix($pm) {
-          requestInstance { request0 =>
-            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(..$names)
-            $mainRoute
+          $httpMethod {
+            requestInstance { request0 =>
+              case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
+              val controller = new AnonClassController(..$names)
+              $complete
+            }
           }
         }
       """
