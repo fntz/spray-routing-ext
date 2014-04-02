@@ -12,7 +12,7 @@ object SprayRoutingExtBuild extends Build {
       scalaVersion := "2.10.3",
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-actor" % "2.2.4",
+        "com.typesafe.akka" %% "akka-actor" % "2.3.0",
         "org.scala-lang"    %  "scala-reflect"   % "2.10.3",
         "org.scalamacros"   %  "quasiquotes_2.10.3" % "2.0.0-M3",
         "io.spray"          %  "spray-can"     % "1.3.1",
