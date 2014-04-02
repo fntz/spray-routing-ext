@@ -254,8 +254,8 @@ object RoutableImpl {
     val exclude0 = original0.filter { x => list.contains(x._1)}
     val exclude1 = original1.filter { x => list.contains(x._1)}
 
-    val resultForBlock = (original1 diff exclude0) map(_._2)
-    val resultOutBlock = (original0 diff exclude1) map(_._2)
+    val resultForBlock = (original1 diff exclude1) map(_._2)
+    val resultOutBlock = (original0 diff exclude0) map(_._2)
 
     val route0 = if(resultForBlock.isEmpty) {
       None

@@ -157,7 +157,7 @@ trait ResorseTestable extends Routable {
           complete{"bar"}
         }
       }
-     }) /*~
+     }) ~
    resourse[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show"))  ~
    resourse[Controller2, Model2]({
      get0[Controller2]("index")
@@ -165,7 +165,6 @@ trait ResorseTestable extends Routable {
    resourse[Controller3, Model3]
 
   val route1 = resourse[Controller4, Model4]
-*/
 
 }
 
@@ -203,7 +202,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       }
 
     }
-/*
+
     it ("when exclude non empty") {
       Get("/model1/index") ~> route ~> check{
         handled should be(false)
@@ -286,7 +285,7 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Re
       Get("/model2/index") ~> route ~> check {
         responseAs[String] should startWith("index")
       }
-    } */
+    }
   }
 }
 
