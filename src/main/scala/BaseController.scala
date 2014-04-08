@@ -1,4 +1,4 @@
-package spray.routing.ext
+package com.github.fntzr.spray.routing.ext
 
 /** A BaseController trait
  *

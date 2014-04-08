@@ -1,4 +1,4 @@
-package spray.routing.ext
+package com.github.fntzr.spray.routing.ext
 import org.scalatest._
 import spray.http.{RequestProcessingException, FormData}
 import spray.routing.HttpService._
