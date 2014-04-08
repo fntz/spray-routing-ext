@@ -27,7 +27,7 @@ trait HttpHelpers {
    * }}}
    * @param action information about method. This method will be use as route path.
    * @tparam C - you controller type
-   * @return [[Route]]
+   * @return Route
    */
   def match0[C](action: String)                                                  = macro HttpHelpersImpl.match01[C]
 
@@ -50,7 +50,7 @@ trait HttpHelpers {
    * @param action - use as method from controller and path for request.
    * @param via - a list with http methods for handle request.
    * @tparam C: you controller type
-   * @return [[Route]]
+   * @return Route
    */
   def match0[C](action: String, via: List[HttpMethod])                           = macro HttpHelpersImpl.match02[C]
 
@@ -69,7 +69,7 @@ trait HttpHelpers {
    * }}}
    * @param tuple: [[(PathMatcher[_ <: HList], String)]] path with method for handle request.
    * @tparam C - you controller
-   * @return [[Route]]
+   * @return Route
    */
   def match0[C](tuple: (PathMatcher[_ <: HList], String))                        = macro HttpHelpersImpl.match03[C]
 
@@ -93,7 +93,7 @@ trait HttpHelpers {
    * @param tuple path with method for handle request.
    * @param via - a list with http methods for handle request.
    * @tparam C - you controller type
-   * @return [[Route]]
+   * @return Route
    */
   def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro HttpHelpersImpl.match0Impl[C]
 
@@ -107,7 +107,7 @@ trait HttpHelpers {
    *  }}}
    * @param action - a controller method.
    * @tparam C - you controller type
-   * @return [[Route]]
+   * @return Route
    */
   def root[C](action: String)           = macro HttpHelpersImpl.rootImpl[C]
 
@@ -128,7 +128,7 @@ trait HttpHelpers {
    * }}}
    * @param path string for path
    * @param block - block of routes
-   * @return [[Route]]
+   * @return Route
    */
   def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
 }

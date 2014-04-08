@@ -41,7 +41,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @param exclude - list with excluded methods (index, show, ...)
    * @tparam C - you controller
    * @tparam M - you model
-   * @return [[Route]]
+   * @return Route
    */
   def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
 
@@ -51,10 +51,10 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    *      get0[Controller]("other")
    *    }
    *  }}}
-   * @param block [[Route]] - block with nested routes
+   * @param block Route - block with nested routes
    * @tparam C - you controller
    * @tparam M - you model
-   * @return [[Route]]
+   * @return Route
    */
   def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
 
@@ -65,10 +65,10 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    *    })
    *  }}}
    * @param exclude - excluded actions
-   * @param block [[Route]] - nested block
+   * @param block Route - nested block
    * @tparam C - you controller
    * @tparam M - you model
-   * @return [[Route]]
+   * @return Route
    */
   def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
 
@@ -78,7 +78,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * }}}
    * @tparam C - you controller
    * @tparam M - you model
-   * @return [[Route]]
+   * @return Route
    */
   def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
 }

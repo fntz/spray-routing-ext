@@ -18,7 +18,7 @@ trait HttpMethods {
    *
    * @param action use as route and as method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def get0[C](action: String)    = macro HttpMethodsImpl.get01Impl[C]
 
@@ -27,7 +27,7 @@ trait HttpMethods {
    *
    * @param action  use as route and as method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def post0[C](action: String)   = macro HttpMethodsImpl.post01Impl[C]
 
@@ -36,7 +36,7 @@ trait HttpMethods {
    *
    * @param action use as route and as method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def put0[C](action: String)    = macro HttpMethodsImpl.put01Impl[C]
 
@@ -45,7 +45,7 @@ trait HttpMethods {
    *
    * @param action use as route and as method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def delete0[C](action: String) = macro HttpMethodsImpl.delete01Impl[C]
 
@@ -64,7 +64,7 @@ trait HttpMethods {
    * }}}
    * @param tuple path and method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.get0Impl[C]
 
@@ -83,7 +83,7 @@ trait HttpMethods {
    * }}}
    * @param tuple path and method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethodsImpl.post0Impl[C]
 
@@ -102,7 +102,7 @@ trait HttpMethods {
    * }}}
    * @param tuple path and method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.put0Impl[C]
 
@@ -121,7 +121,7 @@ trait HttpMethods {
    * }}}
    * @param tuple path and method for controller
    * @tparam C - your controller
-   * @return [[Route]]
+   * @return Route
    */
   def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpMethodsImpl.delete0Impl[C]
 }
