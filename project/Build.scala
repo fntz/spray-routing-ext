@@ -3,10 +3,15 @@ import sbt.Keys._
 
 object SprayRoutingExtBuild extends Build {
 
+  val setting = Defaults.defaultSettings ++ Seq(
+    scalacOptions ++= Seq("-Xlog-free-terms", "-deprecation", "-feature"),
+    scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
+  )
+
   lazy val mainProject = Project(
     id = "spray-routing-ext",
     base = file("."),
-    settings = Project.defaultSettings ++ Seq(
+    settings = Project.defaultSettings ++ setting ++ Seq(
       name := "spray-routing-ext",
       version := "0.1-SNAPSHOT",
       scalaVersion := "2.10.3",
@@ -27,7 +32,7 @@ object SprayRoutingExtBuild extends Build {
   lazy val sampleProject = Project(
     id = "sample",
     base = file("sample"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = Project.defaultSettings ++ setting ++ Seq(
       name := "ext-sample",
       version := "0.1-SNAPSHOT",
       scalaVersion := "2.10.3",
