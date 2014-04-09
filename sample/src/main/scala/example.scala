@@ -1,4 +1,4 @@
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import scala.Some
 import com.github.fntzr.spray.routing.ext._
 import akka.actor._
@@ -13,6 +13,7 @@ import akka.util.Timeout
 import scala.xml._
 import spray.http.StatusCodes
 import scala.language.postfixOps
+
 
 case class Post(id: Int, title: String, description: String)
 
@@ -200,11 +201,11 @@ trait HtmlView {
     }
 
     <form action={action} method="POST">
-      {
+    {
       if (id != 0) {
           <input type="hidden" value={s"$id"} name="id" />
       }
-      }
+    }
     Title: <input type = "text" name="title" value={title}/> <br/>
     Description: <textarea name="description">{description}</textarea> <br/>
         <input type="submit" value={submit} />
@@ -229,7 +230,6 @@ trait HtmlView {
 
 trait ApplicationRouteService extends Routable {
   import Blog._
-  implicit def executionContext = actorRefFactory.dispatcher
 
   def route(db: ActorRef, render: HtmlView) =  {
     resourse[PostController, Post](exclude("create"), {
