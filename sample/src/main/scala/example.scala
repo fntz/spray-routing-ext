@@ -1,6 +1,6 @@
 import scala.concurrent.Await
 import scala.Some
-import spray.routing.ext._
+import com.github.fntzr.spray.routing.ext._
 import akka.actor._
 import akka.io.IO
 import spray.can.Http
@@ -12,6 +12,7 @@ import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
 import scala.xml._
 import spray.http.StatusCodes
+import scala.language.postfixOps
 
 case class Post(id: Int, title: String, description: String)
 
@@ -19,8 +20,11 @@ trait DBInj {
   val db: ActorRef
 }
 
+trait HtmlViewInj {
+  val render: HtmlView
+}
 
-trait PostController extends BaseController with DBInj {
+trait PostController extends BaseController with DBInj with HtmlViewInj {
   import Messages._
   import HttpService._
 
@@ -28,37 +32,12 @@ trait PostController extends BaseController with DBInj {
 
   def index = {
     val posts = Await.result(db ? Index, timeout.duration).asInstanceOf[ArrayBuffer[Post]]
-    val postHtmlView = posts.collect { case Post(id: Int, title: String, description: String) =>
-      val href = s"/post/${id}/"
-      <div>
-        <h3><a href={href}>{id}: {title}</a></h3>
-        <p>{description}</p></div>
-    }
-    html(<div>
-      {postHtmlView}
-      <a href="/post/new">create new post</a>
-    </div>)
+    respond(render.indexView(posts))
   }
 
   def edit(id: Int) = {
     val post = Await.result(db ? Show(id), timeout.duration).asInstanceOf[Option[Post]]
-
-    html(post match {
-      case Some(Post(id: Int, title: String, description: String)) =>
-            val i = s"$id"
-            val action = s"/post/${id}/?_method=put"
-            <div>
-              <h3>Edit form post</h3>
-              <form action={action} method="POST">
-                <input type="hidden" value={i} name="id" />
-                Title: <input type = "text" name="title" value={title}/> <br/>
-                Description: <textarea name="description">{description}</textarea> <br/>
-                <input type="submit" value="update post" />
-              </form>
-            </div>
-
-      case None => <span>Not found Post with {id}</span>
-    })
+    respond(render.editView(post))
   }
 
   def create = {
@@ -72,26 +51,7 @@ trait PostController extends BaseController with DBInj {
 
   def show(id: Int) = {
     val post = Await.result(db ? Show(id), timeout.duration).asInstanceOf[Option[Post]]
-
-    html(post match {
-      case Some(Post(id: Int, title: String, description: String)) =>
-        {
-            val edit   = s"/post/${id}/edit"
-            val delete = s"/post/${id}/?_method=delete"
-            <div>
-              <h3>{id}: {title}</h3>
-              <p>{description}</p>
-              <span>
-                <a href={edit}>Edit</a>
-                <form action={delete} method="POST">
-                  <input type="submit" value="delete" />
-                </form>
-              </span>
-            </div>
-        }
-
-      case None => <span>Not found Post with {id}</span>
-    })
+    respond(render.showView(post))
   }
 
   def delete(id: Int) = {
@@ -99,9 +59,8 @@ trait PostController extends BaseController with DBInj {
     if (isDelete) {
       redirect("/", StatusCodes.MovedPermanently)
     } else {
-      html(<span>Error with delete post with id: {id}</span>)
+      respond(<span>Error with delete post with id: {id}</span>)
     }
-
   }
 
   def update(id: Int) = {
@@ -111,31 +70,19 @@ trait PostController extends BaseController with DBInj {
       if (isUpdate) {
         redirect(s"/post/${id}", StatusCodes.MovedPermanently)
       } else {
-        html(<span>Error with update post with id: {id}</span>)
+        respond(<span>Error with update post with id: {id}</span>)
       }
     }
   }
 
   def fresh = {
-    html(
-      <form method="POST" action="/post/create">
-        <div>Title:<input type="text" value="" name="title" /></div>
-        <br/>
-        <div>Description:<textarea name="description"></textarea></div>
-        <br/>
-        <div><input value="Create post" type="submit" name="submit" /></div>
-      </form>
-    )
+    respond(render.freshView)
   }
 
-  private def html(xml: scala.xml.Elem) = {
+  private def respond(html: scala.xml.Elem) = {
     respondWithMediaType(`text/html`) {
       complete {
-        <html>
-          <body>
-            {xml}
-          </body>
-        </html>
+        {html}
       }
     }
   }
@@ -188,20 +135,113 @@ class DBActor extends Actor {
   }
 }
 
+trait HtmlView {
+
+  def indexView(posts: ArrayBuffer[Post]) = {
+    html(
+      <div>
+        {
+        posts.collect {
+          case Post(id: Int, title: String, description: String) =>
+            val href = s"/post/${id}/"
+            <div>
+              <h3><a href={href}>{id}: {title}</a></h3>
+              <p>{description}</p>
+            </div>
+        }
+        }
+        <a href="/post/new">create new post</a>
+      </div>
+    )
+  }
+
+  def showView(post: Option[Post]) = {
+    html(
+      post match {
+        case Some(Post(id: Int, title: String, description: String)) =>
+          val edit   = s"/post/${id}/edit"
+          <div>
+            <h3>{id}: {title}</h3>
+            <p>{description}</p>
+            <span>
+              <a href={edit}>Edit</a>
+              {deleteHelper(id)}
+            </span>
+          </div>
+
+        case None => <span>Not found Post</span>
+      }
+    )
+  }
+
+  def editView(post: Option[Post]) = {
+    html(
+      post match {
+        case p: Some[Post] =>
+          val action = s"/post/${p.get.id}/?_method=put"
+          <div>
+            <h3>Edit form post</h3>
+            {form(p, action, "update post")}
+          </div>
+
+        case None => <span>Not found Post</span>
+      }
+    )
+  }
+
+  def freshView = {
+    html(form(None, "/post/create", "create post"))
+  }
+
+  def form(post: Option[Post], action: String, submit: String) = {
+    val (id: Int, title: String, description: String) = post match {
+      case Some(Post(id: Int, title: String, description: String)) => (id, title, description)
+      case None => (0, "", "")
+    }
+
+    <form action={action} method="POST">
+      {
+      if (id != 0) {
+          <input type="hidden" value={s"$id"} name="id" />
+      }
+      }
+    Title: <input type = "text" name="title" value={title}/> <br/>
+    Description: <textarea name="description">{description}</textarea> <br/>
+        <input type="submit" value={submit} />
+    </form>
+  }
+
+  def deleteHelper(id: Int) = {
+    val delete = s"/post/${id}/?_method=delete"
+    <form action={delete} method="POST">
+      <input type="submit" value="delete" />
+    </form>
+  }
+
+  private def html(html: scala.xml.Elem) = {
+    <html>
+      <body>
+        {html}
+      </body>
+    </html>
+  }
+}
+
 trait ApplicationRouteService extends Routable {
   import Blog._
   implicit def executionContext = actorRefFactory.dispatcher
 
-  def route(db: ActorRef) =  {
+  def route(db: ActorRef, render: HtmlView) =  {
     resourse[PostController, Post](exclude("create"), {
       post0[PostController]("create")
     }) ~ root[PostController]("index")
   }
 }
 
+
 class ServiceActor(db: ActorRef) extends Actor with ApplicationRouteService {
   def actorRefFactory = context
-  def receive = runRoute(route(db))
+  def receive = runRoute(route(db, new HtmlView {}))
 }
 
 object Blog extends App {
