@@ -132,9 +132,9 @@ trait PostController extends BaseController with DBInj {
     respondWithMediaType(`text/html`) {
       complete {
         <html>
-          <bodu>
+          <body>
             {xml}
-          </bodu>
+          </body>
         </html>
       }
     }
