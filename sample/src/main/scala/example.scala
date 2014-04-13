@@ -6,7 +6,7 @@ import akka.io.IO
 import spray.can.Http
 import spray.http.MediaTypes._
 import spray.routing._
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 import scala.concurrent.duration._
 import akka.pattern.{ ask, pipe }
 import akka.util.Timeout
@@ -32,7 +32,7 @@ trait PostController extends BaseController with DBInj with HtmlViewInj {
   implicit val timeout = Timeout(3 seconds)
 
   def index = {
-    val posts = Await.result(db ? Index, timeout.duration).asInstanceOf[ArrayBuffer[Post]]
+    val posts = Await.result(db ? Index, timeout.duration).asInstanceOf[HashMap[Int, Post]]
     respond(render.indexView(posts))
   }
 
@@ -67,12 +67,8 @@ trait PostController extends BaseController with DBInj with HtmlViewInj {
   def update(id: Int) = {
     formFields('id.as[Int], 'title, 'description) { (id, title, description) =>
       val post = Post(id, title, description)
-      val isUpdate =  Await.result(db ? Update(post), timeout.duration).asInstanceOf[Boolean]
-      if (isUpdate) {
-        redirect(s"/post/${id}", StatusCodes.MovedPermanently)
-      } else {
-        respond(<span>Error with update post with id: {id}</span>)
-      }
+      Await.result(db ? Update(post), timeout.duration).asInstanceOf[Boolean]
+      redirect(s"/post/${id}", StatusCodes.MovedPermanently)
     }
   }
 
@@ -100,56 +96,47 @@ object Messages {
 
 class DBActor extends Actor {
   import Messages._
-  val posts = new ArrayBuffer[Post]
-  posts += Post(1, "new post", "description")
+  val posts = new HashMap[Int, Post]
+  posts += (1 -> Post(1, "new post", "description"))
 
   def receive = {
     case Index => sender ! posts
-    case Show(id: Int) => sender ! posts.find { case p => p.id == id}
+    case Show(id: Int) => sender ! posts.get(id)
     case Update(post: Post) =>
-      val r = posts.find{case p: Post => p.id == post.id} match {
-        case Some(p) =>
-          posts -= p
-          true
-        case None =>
-          false
-      }
-      if (!r) { sender ! false }
-      posts += post
+      posts += (post.id -> post)
       sender ! true
     case Delete(id: Int) =>
-      posts.find{case p => p.id == id} match {
-        case Some(p) =>
-          posts -= p
+      posts.get(id) match {
+        case Some(x) =>
+          posts -= id
           sender ! true
-        case None =>
-          sender ! false
+        case None => sender ! false
       }
     case Create(title: String, description: String) =>
       val id = if (posts.size == 0) {
         1
       } else {
-        posts.map(_.id).max + 1
+        posts.map{ case p @ (id, post) => id }.max + 1
       }
-      posts += Post(id, title, description)
+      posts += (id -> Post(id, title, description))
       sender ! id
   }
 }
 
 trait HtmlView {
 
-  def indexView(posts: ArrayBuffer[Post]) = {
+  def indexView(posts: HashMap[Int, Post]) = {
     html(
       <div>
         {
-        posts.collect {
-          case Post(id: Int, title: String, description: String) =>
-            val href = s"/post/${id}/"
-            <div>
-              <h3><a href={href}>{id}: {title}</a></h3>
-              <p>{description}</p>
-            </div>
-        }
+          posts.collect {
+            case p @ (_, Post(id: Int, title: String, description: String)) =>
+              val href = s"/post/${id}/"
+              <div>
+                <h3><a href={href}>{id}: {title}</a></h3>
+                <p>{description}</p>
+              </div>
+          }
         }
         <a href="/post/new">create new post</a>
       </div>
