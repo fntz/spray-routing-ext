@@ -1,6 +1,7 @@
 Extension for create a rails like routes for http://spray.io/
 
-==Example:
+Example
+--------
 
 ```scala
   resourse[PostController, Post]
@@ -8,7 +9,8 @@ Extension for create a rails like routes for http://spray.io/
 
 Define routes for `Post` model, where actions might be found in `PostController`.
 
-==TODO
+TODO
+-----
 
 * postForm, getForm ... anyMethodForm[Controller, Model](fields)
 
