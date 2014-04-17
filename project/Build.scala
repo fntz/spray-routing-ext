@@ -1,21 +1,21 @@
 import sbt._
 import sbt.Keys._
-
-import aether._
-
+import xerial.sbt.Sonatype._
+import xerial.sbt.Sonatype.SonatypeKeys._
 
 object SprayRoutingExtBuild extends Build {
 
-  val setting = Defaults.defaultSettings ++ Aether.aetherSettings ++ Seq(
+  val setting = Defaults.defaultSettings ++ Seq(
     scalacOptions ++= Seq("-Xlog-free-terms", "-deprecation", "-feature"),
     scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
   )
 
 
+
   lazy val mainProject = Project(
     id = "spray-routing-ext",
     base = file("."),
-    settings = Project.defaultSettings ++ setting ++ Seq(
+    settings = Project.defaultSettings ++ setting ++ sonatypeSettings ++ Seq(
       organization := "com.github.fntzr",
       name := "spray-routing-ext",
       version := "0.1",
@@ -61,13 +61,6 @@ object SprayRoutingExtBuild extends Build {
 
   val pomXml =
       <url>https://github.com/fntzr/spray-routing-ext</url>
-      <licenses>
-        <license>
-          <name>MIT</name>
-          <url>http://opensource.org/licenses/MIT</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
       <scm>
         <url>git@github.com:fntzr/spray-routing-ext.git</url>
         <connection>scm:git:git@github.com:fntzr/spray-routing-ext.git</connection>
