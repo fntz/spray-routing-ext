@@ -1,19 +1,64 @@
-Extension for create a rails like routes for http://spray.io/
+Extension for create a Rails like routes for http://spray.io/
 
-Example
---------
+My post about: [spray-routing-ext: Extend spray-routing](http://fntzr.github.io/scala/2014/04/20/spray-routing-ext-extend-spray-routing.html)
+
+Api doc: [doc](http://fntzr.github.io/api/#package)
+
+Example: [blog](https://github.com/fntzr/spray-routing-ext/blob/master/sample/src/main/scala/example.scala)
+
+Install (by now only for scala 2.10)
+------------------------------------
+
+In `Build.scala`
 
 ```scala
-  resourse[PostController, Post]
+"com.github.fntzr"  %% "spray-routing-ext" % "0.1" 
 ```
 
-Define routes for `Post` model, where actions might be found in `PostController`.
+Usage
+-------
 
+Define routes
+================
+
+```scala
+import com.github.fntzr.spray-routing-ext._
+
+trait MyRoutes extends Routable {
+  val route = resourses[PostController, Post] {
+    pathPrefixt("foo") {
+      get {
+        complete{"foo"}
+      }
+    }
+  } ~ get0[OtherController]("route") ~
+  post0[Controller0](("foo" / IntNumber) ~> "action") ~
+  match0[Controller0]("bar", List(GET, POST, PUT)) ~
+  resourse[ModelController, Model] ~
+  root[PostController]("index")
+}
+```
+
+Define controllers
+===================
+
+```scala
+trait PostController extends BaseController {
+  def index = {
+    complete("index")
+  }
+  def show(id: Int) = {
+    complete(s"show:$id")
+  }
+  //others...
+}
+```
 
 TODO
 -----
 
-* postForm, getForm ... anyMethodForm[Controller, Model](fields)
+* postForm, getForm ... anyMethodForm\[Controller, Model\](fields)
+
 
 License
 --------
