@@ -18,8 +18,8 @@ In `Build.scala`
 Usage
 -------
 
-Define routes
-================
+### Define routes
+
 
 ```scala
 import com.github.fntzr.spray-routing-ext._
@@ -39,8 +39,8 @@ trait MyRoutes extends Routable {
 }
 ```
 
-Define controllers
-===================
+### Define controllers
+
 
 ```scala
 trait PostController extends BaseController {
