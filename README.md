@@ -58,6 +58,7 @@ TODO
 -----
 
 * postForm, getForm ... anyMethodForm\[Controller, Model\](fields)
+* add default value for show\delete\edit methods, now is `id`
 
 
 License
