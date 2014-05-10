@@ -6,7 +6,7 @@ Api doc: [doc](http://fntzr.github.io/api/#com.github.fntzr.spray.routing.ext.Ro
 
 Example: [blog](https://github.com/fntzr/spray-routing-ext/blob/master/sample/src/main/scala/example.scala)
 
-Library add a `resoursse, match0, get0, post0, delete0, put0, root` route directives.
+Library add a `resourse, match0, get0, post0, delete0, put0, root` route directives.
 
 
 Install (by now only for scala 2.10)
@@ -28,7 +28,7 @@ Usage
 import com.github.fntzr.spray-routing-ext._
 
 trait MyRoutes extends Routable {
-  val route = resourses[PostController, Post] {
+  val route = resourse[PostController, Post] {
     pathPrefixt("foo") {
       get {
         complete{"foo"}
