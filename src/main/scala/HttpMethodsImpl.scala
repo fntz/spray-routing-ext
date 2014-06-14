@@ -260,7 +260,7 @@ object HttpMethodsImpl {
       q"""
         $httpMethod {
           requestInstance { request0 =>
-            case class $klassName(..$sum) extends ${c.weakTypeOf[C]}
+            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
             val controller = new AnonClassController(..$names)
             $complete
           }
