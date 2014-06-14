@@ -154,7 +154,7 @@ object HttpHelpersImpl {
     import c.universe._
 
     val route = q"""
-      get0[${c.weakTypeOf[C]}]("" ~> $action)
+      get0[${c.weakTypeOf[C]}]("/" ~> $action)
     """
     c.Expr[Route](route)
   }

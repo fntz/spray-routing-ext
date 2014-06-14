@@ -256,31 +256,60 @@ object HttpMethodsImpl {
       (sum, names)
     }
 
+    val innerBlock =
+      q"""
+        $httpMethod {
+          requestInstance { request0 =>
+            case class $klassName(..$sum) extends ${c.weakTypeOf[C]}
+            val controller = new AnonClassController(..$names)
+            $complete
+          }
+        }
+      """
+
     //TODO: generate class name on fly
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>
-          $httpMethod {
-            requestInstance { request0 =>
-              case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-              val controller = new AnonClassController(..$names)
-              $complete
-            }
-          }
+          $innerBlock
         }
       """
     } else {
-      q"""
-        pathPrefix($pm) {
-          $httpMethod {
-            requestInstance { request0 =>
-              case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-              val controller = new AnonClassController(..$names)
-              $complete
+      /**
+        *  Fix issue: https://github.com/fntzr/spray-routing-ext/issues/2
+        *  when a we have a next route
+        *  root[RootController]("index") ~
+        *  pathPrefix("css") {
+        *    complete {
+        *      "css"
+        *    }
+        *  }
+        *
+        *  With test:
+        *    Get("/") ~> route ~> check {
+        *    responseAs[String] should startWith("index")
+        *  }
+        *  Get("/css") ~> route ~> check {
+        *    responseAs[String] should startWith("css") // but ... index!
+        *  }
+        *
+       **/
+
+
+      pm match {
+        case Apply(_, List(Literal(Constant(x)))) if x == "/" =>
+          q"""
+            pathSingleSlash {
+              $innerBlock
             }
-          }
-        }
-      """
+          """
+        case _ =>
+          q"""
+            pathPrefix($pm) {
+              $innerBlock
+            }
+          """
+      }
     }
 
     c.Expr[Route](route)
