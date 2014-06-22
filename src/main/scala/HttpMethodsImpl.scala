@@ -189,8 +189,9 @@ object HttpMethodsImpl {
      Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "update")
      Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "delete")
     */
-    val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
-
+    val (_, pm, _) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
+    val method = HelpersImpl.methodFromTuple[C](c)(tuple)
+    
     //FIXME: rewrite this
     var count = 0
     if (pm.children.size == 1) {
@@ -202,15 +203,6 @@ object HttpMethodsImpl {
       }
     }
 
-    val methodName = action match {
-      case Literal(Constant(x)) => x.asInstanceOf[String]
-    }
-
-    val method = c.weakTypeOf[C].declaration(newTermName(methodName))
-
-    if (method == NoSymbol) {
-      c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
-    }
 
     val paramVals = (0 until count).collect{
       case x => ValDef(Modifiers(Flag.PARAM), newTermName(s"tmp$x"), TypeTree(), EmptyTree)
