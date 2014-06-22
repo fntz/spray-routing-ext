@@ -184,14 +184,9 @@ object HttpMethodsImpl {
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod): c.Expr[Route] = {
     import c.universe._
 
-    /*
-     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "show")
-     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "update")
-     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "delete")
-    */
-    val (_, pm, _) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
     val method = HelpersImpl.methodFromTuple[C](c)(tuple)
-    
+    val pm     = HelpersImpl.pathFromTuple[C](c)(tuple)
+
     //FIXME: rewrite this
     var count = 0
     if (pm.children.size == 1) {
