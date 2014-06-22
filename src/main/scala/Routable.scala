@@ -32,7 +32,7 @@ object exclude {
  *   }}}
  * Note: for `new` method in controller use `fresh` name.
  */
-trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers {
+trait Routable extends HttpService with HttpMethods with HttpHelpers with Helpers with HttpFormSupport {
 
   /** Define routes without excluded pathes.
    * {{{
@@ -228,11 +228,12 @@ object RoutableImpl {
         (sum, names)
     }
     //Refactor this.
+    val anonClassName = newTypeName(c.fresh("Controller"))
     val create = q"""
       post {
         requestInstance { request0 =>
-          case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-          val controller = new AnonClassController(..$names)
+          case class $anonClassName(..$sum) extends ${c.weakTypeOf[C]}
+          val controller = new $anonClassName(..$names)
 
           formFields(..$extract).as($model) { (model) =>
             controller.create(model)

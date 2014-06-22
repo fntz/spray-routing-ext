@@ -8,7 +8,7 @@ import spray.http._
 import shapeless._
 import shapeless.Traversables._
 
-/** Trait containt http methods realisation
+/** Trait contain http methods realisation
  *
  */
 trait HttpMethods {
@@ -184,6 +184,11 @@ object HttpMethodsImpl {
                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)], mth: HttpMethod): c.Expr[Route] = {
     import c.universe._
 
+    /*
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "show")
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "update")
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "delete")
+    */
     val (_, pm, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
 
     //FIXME: rewrite this
@@ -255,13 +260,13 @@ object HttpMethodsImpl {
       val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
       (sum, names)
     }
-
+    val anonClassName = newTypeName(c.fresh("Controller"))
     val innerBlock =
       q"""
         $httpMethod {
           requestInstance { request0 =>
-            case class AnonClassController(..$sum) extends ${c.weakTypeOf[C]}
-            val controller = new AnonClassController(..$names)
+            case class $anonClassName(..$sum) extends ${c.weakTypeOf[C]}
+            val controller = new $anonClassName(..$names)
             $complete
           }
         }
