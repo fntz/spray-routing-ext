@@ -235,31 +235,8 @@ object HttpMethodsImpl {
       }
     """
 
-    val outerMethod = c.enclosingMethod
-    val requestVal = List(q"val request: spray.http.HttpRequest")
+    val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
 
-    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
-
-      val vs = (outerMethod match {
-        case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs
-      }).asInstanceOf[List[ValDef]]
-
-      val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
-
-      val sum = requestVal ++ vvs
-
-      val tmpNames = List("request0") ++ vs.map{x => s"${x.name}"}
-
-      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
-      (sum, names)
-    } else {
-      val sum = requestVal
-
-      val tmpNames = List("request0")
-
-      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
-      (sum, names)
-    }
     val anonClassName = newTypeName(c.fresh("Controller"))
     val innerBlock =
       q"""

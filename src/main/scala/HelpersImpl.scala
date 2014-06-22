@@ -34,4 +34,43 @@ object HelpersImpl {
     val t = q"($pm, $action)"
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
+
+    /**
+     * When route define in method:
+     *   def myMethod(a: Int, s: String) = {
+     *      resourse[C, M]
+     *   }
+     *
+     *  This methods return all argumentds from outer method (a, s) + define request0 value, also return all names for params
+      * @param c [Context]
+     * @return Tuple2[List[ValDef], List[Ident]]
+     */
+  def extractValuesFromOuterMethod(c: Context) = {
+    import c.universe._
+    val requestVal = List(q"val request: spray.http.HttpRequest")
+    val outerMethod = c.enclosingMethod
+    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
+
+      val vs = (outerMethod match {
+        case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs
+      }).asInstanceOf[List[ValDef]]
+
+      val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
+
+      val sum = requestVal ++ vvs
+
+      val tmpNames = List("request0") ++ vs.map{x => s"${x.name}"}
+
+      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      (sum, names)
+    } else {
+      val sum = requestVal
+
+      val tmpNames = List("request0")
+
+      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      (sum, names)
+    }
+    (sum, names)
+  }
 }
