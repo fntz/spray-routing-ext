@@ -74,6 +74,12 @@ object HelpersImpl {
     (sum, names)
   }
 
+    /**
+     *  From given tuple Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "show")
+     *  and class C, extract method symbol for class, when method not defined, this stop compilation
+     *
+     */
+
   def methodFromTuple[C: c.WeakTypeTag](c: Context)(tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.universe.Symbol = {
     import c.universe._
 
@@ -94,5 +100,16 @@ object HelpersImpl {
       c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
     }
     method
+  }
+
+    /**
+     *  Extract path from tuple
+     *
+     */
+  def pathFromTuple[C: c.WeakTypeTag](c: Context)(tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Tree = {
+    import c.universe._
+
+    val (_, pm, _) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
+    pm
   }
 }
