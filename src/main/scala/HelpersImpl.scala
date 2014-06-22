@@ -2,9 +2,9 @@ package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
-import shapeless.HList
 import spray.routing.PathMatcher
-
+import shapeless._
+import shapeless.Traversables._
 
 /**
  * Provides implicits for String and spray.routing.PathMatcher
@@ -41,7 +41,7 @@ object HelpersImpl {
      *      resourse[C, M]
      *   }
      *
-     *  This methods return all argumentds from outer method (a, s) + define request0 value, also return all names for params
+     *  This methods return all arguments from outer method (a, s) + define request0 value, also return all names for params
       * @param c [Context]
      * @return Tuple2[List[ValDef], List[Ident]]
      */
@@ -72,5 +72,27 @@ object HelpersImpl {
       (sum, names)
     }
     (sum, names)
+  }
+
+  def methodFromTuple[C: c.WeakTypeTag](c: Context)(tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.universe.Symbol = {
+    import c.universe._
+
+    /*
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "show")
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "update")
+     Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "delete")
+    */
+    val (_, _, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
+
+    val methodName = action match {
+      case Literal(Constant(x)) => x.asInstanceOf[String]
+    }
+
+    val method = c.weakTypeOf[C].declaration(newTermName(methodName))
+
+    if (method == NoSymbol) {
+      c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
+    }
+    method
   }
 }
