@@ -1,10 +1,11 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.routable
 import org.scalatest._
 import spray.http.{RequestProcessingException, FormData}
 import spray.routing.HttpService._
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.HttpHeaders._
+import com.github.fntzr.spray.routing.ext._
 
 
 case class Model0(id: Int, title: String)
@@ -148,7 +149,7 @@ trait Controller4 extends BaseController {
 
 
 
-trait ResorseTestable extends Routable {
+trait Routing extends Routable {
 
   val route =
    resourse[Controller0, Model0](exclude(), {
@@ -168,7 +169,7 @@ trait ResorseTestable extends Routable {
 
 }
 
-class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with ResorseTestable {
+class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("resourse") {

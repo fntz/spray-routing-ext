@@ -1,11 +1,12 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.httphelpers
 import org.scalatest._
 import spray.http.{FormData}
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.HttpHeaders._
+import com.github.fntzr.spray.routing.ext._
 
-trait HttpHelpersController extends BaseController {
+trait Controller extends BaseController {
   import HttpService._
 
   def foo = {
@@ -21,25 +22,25 @@ trait HttpHelpersController extends BaseController {
   }
 }
 
-trait HttpHelpersTestable extends Routable {
+trait Routing extends Routable {
   import spray.http.HttpMethods._
   val route = scope("scope") {
-    get0[HttpHelpersController]("foo") ~
+    get0[Controller]("foo") ~
     scope("nested") {
       get {
         complete("nested")
       }
     } ~
-    match0[HttpHelpersController]("baz0" ~> "baz", List(GET, PUT)) ~
-    match0[HttpHelpersController]("baz") ~
-    match0[HttpHelpersController]("baz1" ~> "baz")
+    match0[Controller]("baz0" ~> "baz", List(GET, PUT)) ~
+    match0[Controller]("baz") ~
+    match0[Controller]("baz1" ~> "baz")
   }
 
-  val rt = root[HttpHelpersController]("root")
+  val rt = root[Controller]("root")
 
 }
 
-class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with HttpHelpersTestable {
+class HttpHelpersTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("scope") {

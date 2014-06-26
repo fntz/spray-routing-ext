@@ -1,11 +1,13 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.respondto
+
 import org.scalatest._
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.BadRequest
+import com.github.fntzr.spray.routing.ext._
 
-trait MyRespondController extends BaseController with RespondToSupport {
+trait Controller extends BaseController with RespondToSupport {
   import HttpService._
   def show = {
     respondTo {
@@ -16,11 +18,11 @@ trait MyRespondController extends BaseController with RespondToSupport {
   }
 }
 
-trait RespondRoutes extends Routable {
-  val route = get0[MyRespondController]("show")
+trait Routing extends Routable {
+  val route = get0[Controller]("show")
 }
 
-class RespondTest extends FunSpec with Matchers with ScalatestRouteTest with RespondRoutes {
+class RespondTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("respond to") {

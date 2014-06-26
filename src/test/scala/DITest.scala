@@ -1,9 +1,9 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.di
 import org.scalatest._
 import spray.http.{FormData}
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
-import spray.http.HttpHeaders._
+import com.github.fntzr.spray.routing.ext._
 
 
 trait DI {
@@ -12,7 +12,7 @@ trait DI {
   val xs : List[String]
 }
 
-trait DIController extends BaseController with DI {
+trait Controller extends BaseController with DI {
   import HttpService._
 
   def method = {
@@ -22,13 +22,13 @@ trait DIController extends BaseController with DI {
 }
 
 
-trait DITestable extends Routable {
+trait Routing extends Routable {
   def route(a: Int, b: String, xs: List[String]): Route = {
-    get0[DIController]("method")
+    get0[Controller]("method")
   }
 }
 
-class DITest extends FunSpec with Matchers with ScalatestRouteTest with DITestable {
+class DITest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   val z = route(1, "qwerty", List[String]("1", "2", "3"))

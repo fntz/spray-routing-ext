@@ -1,19 +1,20 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.root
 import org.scalatest._
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.HttpHeaders._
+import com.github.fntzr.spray.routing.ext._
 
-trait RootController {
+trait Controller {
   import HttpService._
   def index = {
     complete{"index"}
   }
 }
 
-trait RootTestable extends Routable {
+trait Routing extends Routable {
   val route =
-    root[RootController]("index") ~
+    root[Controller]("index") ~
     pathPrefix("css") {
       complete {
         "css"
@@ -21,7 +22,7 @@ trait RootTestable extends Routable {
     }
 }
 
-class RootTest extends FunSpec with Matchers with ScalatestRouteTest with RootTestable {
+class RootTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("root test") {

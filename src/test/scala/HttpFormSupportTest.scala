@@ -7,12 +7,12 @@ import spray.routing._
 import com.github.fntzr.spray.routing.ext._
 
 
-case class Model10(id: Int, title: Option[String] = None)
+case class Model(id: Int, title: Option[String] = None)
 
 trait HttpFormController extends BaseController {
   import HttpService._
 
-  def post(m: Model10) = {
+  def post(m: Model) = {
     val id = m.id
     val title = m.title.get
     complete(s"${id}${title}")
@@ -26,8 +26,8 @@ trait HttpFormController extends BaseController {
 
 
 trait HttpFormSupportTestable extends Routable {
-  val route  = postForm[HttpFormController, Model10]("another", "id") ~
-               postForm[HttpFormController, Model10]("z" ~> "post")
+  val route  = postForm[HttpFormController, Model]("another", "id") ~
+               postForm[HttpFormController, Model]("z" ~> "post")
 }
 
 class HttpFormSupportTest extends FunSpec with Matchers with ScalatestRouteTest with HttpFormSupportTestable {

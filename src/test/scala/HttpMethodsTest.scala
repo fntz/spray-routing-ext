@@ -1,12 +1,14 @@
-package com.github.fntzr.spray.routing.ext
+package com.github.fntzr.spray.routing.ext.test.httpmethods
+
 import org.scalatest._
 import spray.http.{FormData}
 import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.HttpHeaders._
+import com.github.fntzr.spray.routing.ext._
 
 
-trait HttpMethodsController extends BaseController {
+trait Controller extends BaseController {
   import HttpService._
 
   def foo(id: Int) = {
@@ -38,15 +40,15 @@ trait HttpMethodsController extends BaseController {
 
 
 
-trait HttpMethodsTestable extends Routable {
-   val route  = get0[HttpMethodsController](("foo" / IntNumber) ~> "foo") ~
-    get0[HttpMethodsController](("foo" / Segment) ~> "foo0") ~
-    get0[HttpMethodsController]("foo" ~> "foo1") ~
-    get0[HttpMethodsController]("baz") ~
-    get0[HttpMethodsController]("custom")
+trait Routing extends Routable {
+   val route  = get0[Controller](("foo" / IntNumber) ~> "foo") ~
+    get0[Controller](("foo" / Segment) ~> "foo0") ~
+    get0[Controller]("foo" ~> "foo1") ~
+    get0[Controller]("baz") ~
+    get0[Controller]("custom")
 }
 
-class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with HttpMethodsTestable {
+class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("get0") {
