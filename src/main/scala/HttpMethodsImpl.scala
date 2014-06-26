@@ -198,7 +198,6 @@ object HttpMethodsImpl {
       }
     }
 
-
     val paramVals = (0 until count).collect{
       case x => ValDef(Modifiers(Flag.PARAM), newTermName(s"tmp$x"), TypeTree(), EmptyTree)
     }.toList
