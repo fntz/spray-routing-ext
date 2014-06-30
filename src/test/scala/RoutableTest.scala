@@ -295,5 +295,3 @@ class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Ro
   }
 }
 
-
-
