@@ -117,11 +117,26 @@ object RoutableImpl {
   def resourse7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (exclude: c.Expr[List[String]], block: c.Expr[Route], sub: c.Expr[PathMatcher1[_]]) = ???
 
+
   def resourse6Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (sub: c.Expr[PathMatcher1[_]], block: c.Expr[Route]) = ???
 
+
   def resourse5Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-                   (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]) = ???
+                   (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]): c.Expr[Route] = {
+    import c.universe._
+
+    val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
+
+    val route = q"""pathPrefix("/z"){get{ complete{"123" }}}  """
+
+
+
+
+    c.Expr[Route](route)
+
+
+  }
 
 
   def resourse4Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
@@ -145,19 +160,17 @@ object RoutableImpl {
 
     val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
 
-    val result = getRoute[C, M](c)(exclude)
+    val result = getRoute[C, M](c)(exclude, c.Expr[PathMatcher1[_]](q"IntNumber"))
 
-    val route = result match {
-      case Some(x) =>
-        q"""
-          pathPrefix($startPath) {
-            $x
-          }
-        """
-      case None =>
-        c.error(c.enclosingPosition, s"resourse should have a Route type")
-        q""" get{complete{"123"}} """
+    if (result.isEmpty) {
+      c.error(c.enclosingPosition, s"resourse should have a Route type")
     }
+
+    val route = q"""
+      pathPrefix($startPath) {
+        ${result.get}
+      }
+    """
 
     c.Expr[Route](route)
   }
@@ -167,7 +180,7 @@ object RoutableImpl {
 
     val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
 
-    val result = getRoute[C, M](c)(exclude)
+    val result = getRoute[C, M](c)(exclude, c.Expr[PathMatcher1[_]](q"IntNumber"))
 
     val route = result match {
       case Some(x) =>
@@ -196,7 +209,7 @@ object RoutableImpl {
   }
 
   private def getRoute[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-              (exclude: c.Expr[List[String]]):Option[c.Expr[Route]] = {
+              (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]):Option[c.Expr[Route]] = {
     import c.universe._
 
     val params = c.weakTypeOf[M].declarations.collect {
@@ -228,11 +241,11 @@ object RoutableImpl {
     val model = newTermName(s"${c.weakTypeOf[M].typeSymbol.name}")
     val controller = c.weakTypeOf[C]
 
-    val show   = q"""get0[$controller](IntNumber ~> "show")"""
+    val show   = q"""get0[$controller]($sub ~> "show")"""
     val index  = q"""get0[$controller]("index")"""
-    val edit   = q"""get0[$controller]((IntNumber / "edit") ~> "edit")"""
-    val update = q"""put0[$controller](IntNumber ~> "update")"""
-    val delete = q"""delete0[$controller](IntNumber ~> "delete")"""
+    val edit   = q"""get0[$controller](($sub / "edit") ~> "edit")"""
+    val update = q"""put0[$controller]($sub ~> "update")"""
+    val delete = q"""delete0[$controller]($sub ~> "delete")"""
 
 
     val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
