@@ -6,6 +6,9 @@ import scala.reflect.macros.Context
 import spray.routing._
 import scala.language.implicitConversions
 
+import spray.routing.PathMatchers._
+import spray.routing._
+import spray.routing.PathMatcher1
 /**
  * Object for transformation String* into List
  * {{{
@@ -15,6 +18,21 @@ import scala.language.implicitConversions
 object exclude {
   def apply(xs: String*) = xs.toList
 }
+
+/*
+def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
+def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
+def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
+def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
+
+subroute:
+
+def resourse[C, M](exclude: List[String], sub: PathMatcher1[_])
+def resourse[C, M](sub: PathMatcher1[_], block: Route)
+def resourse[C, M](exclude: List[String], sub: PathMatcher1[_], block: Route)
+
+ */
+
 
 /**
  * Trait contatin methods for resourse implementation.
@@ -81,6 +99,13 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @return Route
    */
   def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
+
+
+  def resourse[C, M](exclude: List[String], sub: PathMatcher1[_]) = macro RoutableImpl.resourse5Impl[C, M]
+  def resourse[C, M](sub: PathMatcher1[_], block: Route) = macro RoutableImpl.resourse6Impl[C, M]
+  def resourse[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]) = macro RoutableImpl.resourse7Impl[C, M]
+
+
 }
 
 /** Object, which contatain resourse implementation.
@@ -88,6 +113,16 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
  */
 object RoutableImpl {
   import spray.routing.Route
+
+  def resourse7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                   (exclude: c.Expr[List[String]], block: c.Expr[Route], sub: c.Expr[PathMatcher1[_]]) = ???
+
+  def resourse6Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                   (sub: c.Expr[PathMatcher1[_]], block: c.Expr[Route]) = ???
+
+  def resourse5Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+                   (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]) = ???
+
 
   def resourse4Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
     import c.universe._
