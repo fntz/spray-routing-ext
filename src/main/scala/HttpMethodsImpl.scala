@@ -164,8 +164,6 @@ object HttpMethodsImpl {
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
 
-    LinkToHelpersImpl.pathCreate[C](c)(tuple, HttpMethods.GET)
-
     methodImpl[C](c)(tuple, HttpMethods.GET)
   }
 
