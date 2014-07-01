@@ -7,7 +7,6 @@ import spray.routing._
 import spray.http._
 import shapeless._
 import shapeless.Traversables._
-import com.github.fntzr.spray.routing.ext.helpers._
 
 /** Trait contain http methods realisation
  *
