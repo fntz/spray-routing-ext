@@ -162,7 +162,7 @@ object HttpMethodsImpl {
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-
+    println(123)
     methodImpl[C](c)(tuple, HttpMethods.GET)
   }
 
@@ -200,15 +200,15 @@ object HttpMethodsImpl {
     }
 
     val paramVals = (0 until count).collect{
-      case x => ValDef(Modifiers(Flag.PARAM), newTermName(s"tmp$x"), TypeTree(), EmptyTree)
+      case x => ValDef(Modifiers(Flag.PARAM), TermName(s"tmp$x"), TypeTree(), EmptyTree)
     }.toList
 
     val vals = (0 until count).collect {
-      case x => Ident(newTermName(s"tmp$x"))
+      case x => Ident(TermName(s"tmp$x"))
     }.toList
 
     val plain = mth.toString.toLowerCase
-    val httpMethod    = newTermName(plain)
+    val httpMethod    = TermName(plain)
 
     val complete = if (count != 0) {
       q"controller.$method(..$vals)"
@@ -224,7 +224,7 @@ object HttpMethodsImpl {
 
     val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
 
-    val anonClassName = newTypeName(c.fresh("Controller"))
+    val anonClassName = TypeName(c.freshName("Controller"))
     val innerBlock =
       q"""
         $httpMethod {

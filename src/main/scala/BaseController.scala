@@ -85,9 +85,9 @@ object RespondMacro {
   def respondImpl(c: Context)(pf: c.Expr[PartialFunction[MediaType, ToResponseMarshallable]]): c.Expr[Route] = {
     import c.universe._
 
-    val name = newTermName(c.fresh())
-    val h = newTermName(c.fresh())
-    val x = newTermName(c.fresh())
+    val name = TermName(c.freshName())
+    val h = TermName(c.freshName())
+    val x = TermName(c.freshName())
 
     val result = pf.tree.collect {
       case q"$mods def $tname[..$tparams](...$paramss): $tpt = $expr" if s"$tname" == "applyOrElse" =>

@@ -71,15 +71,15 @@ object HttpFormSupportImpl {
     val pm     = HelpersImpl.pathFromTuple[C](c)(tuple)
 
     val model = c.weakTypeOf[M]
-    val modelName = newTermName(s"${model.typeSymbol.name}")
+    val modelName = TermName(s"${model.typeSymbol.name}")
 
     if (!model.typeSymbol.isClass)
       c.abort(c.enclosingPosition, "Model must be a Class")
 
 
-    val params = model.declarations.collect {
+    val params = model.decls.collect {
       case x: MethodSymbol if x.isConstructor =>
-        x.paramss.map(_.map(_.asTerm))
+        x.paramLists.map(_.map(_.asTerm))
     }.flatMap(_.flatten)
 
     if (params.size == 0) {
@@ -88,7 +88,7 @@ object HttpFormSupportImpl {
 
     //without excluded arguments
     val actual = params.zip(params.map(_.typeSignature))
-      .filter{case (s, t) => !excl.contains(s.name.decoded)}
+      .filter{case (s, t) => !excl.contains(s.name.decodedName.toString)}
 
     //it's used for `formFields` and extract all arguments as 'arg0? arg1.as[Int] ...
     val extract = actual.map{
@@ -103,11 +103,11 @@ object HttpFormSupportImpl {
 
     val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
 
-    val anonClassName = newTypeName(c.fresh("Controller"))
+    val anonClassName = TypeName(c.freshName("Controller"))
 
     //vals for create passed values from formFields { (vals) =>
     val vals = (0 until extract.size).map{
-      case _ => ValDef(Modifiers(Flag.PARAM), newTermName(c.fresh("param")), TypeTree(), EmptyTree)
+      case _ => ValDef(Modifiers(Flag.PARAM), TermName(c.freshName("param")), TypeTree(), EmptyTree)
     }.toList
 
     //args for create arguments for create model instance: `new model(args)` | List(Ident(newTermName("a1")))
@@ -124,7 +124,7 @@ object HttpFormSupportImpl {
       """
     } else {
       //map
-      val mapName = newTermName(c.fresh())
+      val mapName = TermName(c.freshName())
 
       val map = q" val $mapName = scala.collection.mutable.Map[String, Any]() "
 
@@ -137,7 +137,7 @@ object HttpFormSupportImpl {
       }
 
       //Return immutable map
-      val immutableMapName = newTermName(c.fresh())
+      val immutableMapName = TermName(c.freshName())
       val imMap = q" val $immutableMapName = scala.collection.immutable.Map[String, Any]() ++ $mapName "
 
       q"""

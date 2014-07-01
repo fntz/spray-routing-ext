@@ -41,11 +41,11 @@ trait Controller extends BaseController {
 
 
 trait Routing extends Routable {
-   val route  = get0[Controller](("foo" / IntNumber) ~> "foo") ~
-    get0[Controller](("foo" / Segment) ~> "foo0") ~
-    get0[Controller]("foo" ~> "foo1") ~
-    get0[Controller]("baz") ~
-    get0[Controller]("custom")
+   val route  = get0[Controller](("foo" / IntNumber) ~> "foo")// ~
+//    get0[Controller](("foo" / Segment) ~> "foo0") ~
+//    get0[Controller]("foo" ~> "foo1") ~
+//    get0[Controller]("baz") ~
+//    get0[Controller]("custom")
 }
 
 class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
@@ -58,30 +58,30 @@ class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with
       }
     }
 
-    it("should take a parameter when parameter as path") {
-      Get("/foo/bar") ~> route ~> check {
-        responseAs[String] should startWith("bar")
-      }
-    }
-
-    it("should call method from type") {
-      Get("/foo") ~> route ~> check {
-        responseAs[String] should startWith("pass")
-      }
-    }
-
-    it("should pass into default action for one argument") {
-      Get("/baz") ~> route ~> check {
-        responseAs[String] should startWith("baz")
-      }
-    }
-
-    it("should get headers from controller") {
-      Get("/custom") ~> route ~> check {
-        headers.filter(_.is("mysuperheader")) === List(RawHeader("MySuperHeader", "wow"))
-        responseAs[String] should startWith("custom")
-      }
-    }
+//    it("should take a parameter when parameter as path") {
+//      Get("/foo/bar") ~> route ~> check {
+//        responseAs[String] should startWith("bar")
+//      }
+//    }
+//
+//    it("should call method from type") {
+//      Get("/foo") ~> route ~> check {
+//        responseAs[String] should startWith("pass")
+//      }
+//    }
+//
+//    it("should pass into default action for one argument") {
+//      Get("/baz") ~> route ~> check {
+//        responseAs[String] should startWith("baz")
+//      }
+//    }
+//
+//    it("should get headers from controller") {
+//      Get("/custom") ~> route ~> check {
+//        headers.filter(_.is("mysuperheader")) === List(RawHeader("MySuperHeader", "wow"))
+//        responseAs[String] should startWith("custom")
+//      }
+//    }
   }
 }
 

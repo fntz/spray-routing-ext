@@ -61,14 +61,14 @@ object HelpersImpl {
 
       val tmpNames = List("request0") ++ vs.map{x => s"${x.name}"}
 
-      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      val names = tmpNames.collect{ case x =>Ident(TermName(x))}
       (sum, names)
     } else {
       val sum = requestVal
 
       val tmpNames = List("request0")
 
-      val names = tmpNames.collect{ case x =>Ident(newTermName(x))}
+      val names = tmpNames.collect{ case x =>Ident(TermName(x))}
       (sum, names)
     }
     (sum, names)
@@ -94,7 +94,7 @@ object HelpersImpl {
       case Literal(Constant(x)) => x.asInstanceOf[String]
     }
 
-    val method = c.weakTypeOf[C].declaration(newTermName(methodName))
+    val method = c.weakTypeOf[C].decl(TermName(methodName))
 
     if (method == NoSymbol) {
       c.error(c.enclosingPosition, s"Method `$methodName` not found in `${c.weakTypeOf[C]}`")
