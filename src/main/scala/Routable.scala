@@ -115,11 +115,42 @@ object RoutableImpl {
   import spray.routing.Route
 
   def resourse7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-                   (exclude: c.Expr[List[String]], block: c.Expr[Route], sub: c.Expr[PathMatcher1[_]]) = ???
+                   (exclude: c.Expr[List[String]], block: c.Expr[Route], sub: c.Expr[PathMatcher1[_]]): c.Expr[Route] = {
+    import c.universe._
+
+    val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
+
+    val result = getRoute[C, M](c)(exclude, sub)
+
+    val route = result match {
+      case Some(x) =>
+        q"""
+          pathPrefix($startPath) {
+            $x ~
+            $block
+          }
+        """
+      case None =>
+        q"""
+          pathPrefix($startPath) {
+            $block
+          }
+        """
+    }
+
+    c.Expr[Route](route)
+  }
 
 
   def resourse6Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
-                   (sub: c.Expr[PathMatcher1[_]], block: c.Expr[Route]) = ???
+                   (sub: c.Expr[PathMatcher1[_]], block: c.Expr[Route]): c.Expr[Route] = {
+
+    import c.universe._
+
+    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block, $sub)"""
+
+    c.Expr[Route](route)
+  }
 
 
   def resourse5Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
@@ -128,14 +159,19 @@ object RoutableImpl {
 
     val startPath = convertToPath(s"${c.weakTypeOf[M].typeSymbol.name.toString}")
 
-    val route = q"""pathPrefix("/z"){get{ complete{"123" }}}  """
+    val result = getRoute[C, M](c)(exclude, sub)
 
+    if (result.isEmpty) {
+      c.error(c.enclosingPosition, s"resourse should have a Route type")
+    }
 
-
+    val route = q"""
+      pathPrefix($startPath) {
+        ${result.get}
+      }
+    """
 
     c.Expr[Route](route)
-
-
   }
 
 
