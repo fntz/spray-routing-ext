@@ -248,9 +248,9 @@ object RoutableImpl {
               (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]):Option[c.Expr[Route]] = {
     import c.universe._
 
-    val params = c.weakTypeOf[M].declarations.collect {
+    val params = c.weakTypeOf[M].decls.collect {
       case x: MethodSymbol if x.isConstructor =>
-        x.paramss.map(_.map(_.asTerm))
+        x.paramLists.map(_.map(_.asTerm))
     }.flatMap(_.flatten)
 
     if (params.exists(_.isParamWithDefault)) {
@@ -274,7 +274,7 @@ object RoutableImpl {
       c.abort(c.enclosingPosition, s"Model `${c.weakTypeOf[M]}` should have a parameters!")
     }
 
-    val model = newTermName(s"${c.weakTypeOf[M].typeSymbol.name}")
+    val model = TermName(s"${c.weakTypeOf[M].typeSymbol.name}")
     val controller = c.weakTypeOf[C]
 
     val show   = q"""get0[$controller]($sub ~> "show")"""
@@ -286,7 +286,7 @@ object RoutableImpl {
 
     val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
 
-    val anonClassName = newTypeName(c.fresh("Controller"))
+    val anonClassName = TypeName(c.freshName("Controller"))
     val create = q"""
       post {
         requestInstance { request0 =>

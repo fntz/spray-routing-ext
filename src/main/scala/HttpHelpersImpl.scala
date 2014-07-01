@@ -183,8 +183,8 @@ object HttpHelpersImpl {
 
     val block = via.tree.collect {
       case Select(Select(Select(Ident(_), _), _), x) =>
-        val httpMethod = newTermName(s"$x".toLowerCase+"0")
-        val impl = c.weakTypeOf[HttpMethods].declaration(httpMethod)
+        val httpMethod = TermName(s"$x".toLowerCase+"0")
+        val impl = c.weakTypeOf[HttpMethods].decl(httpMethod)
         q"$impl[${c.weakTypeOf[C]}]($tuple)"
     }.reduce((a, b) => q"$a ~ $b" )
 
