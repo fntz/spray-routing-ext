@@ -7,6 +7,7 @@ import spray.routing._
 import spray.http._
 import shapeless._
 import shapeless.Traversables._
+import com.github.fntzr.spray.routing.ext.helpers._
 
 /** Trait contain http methods realisation
  *
@@ -162,6 +163,9 @@ object HttpMethodsImpl {
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
+
+    LinkToHelpersImpl.pathCreate[C](c)(tuple, HttpMethods.GET)
+
     methodImpl[C](c)(tuple, HttpMethods.GET)
   }
 

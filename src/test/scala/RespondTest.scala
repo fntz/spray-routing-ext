@@ -7,6 +7,7 @@ import spray.http.MediaTypes._
 import spray.http.StatusCodes.BadRequest
 import com.github.fntzr.spray.routing.ext._
 
+
 trait Controller extends BaseController with RespondToSupport {
   import HttpService._
   def show = {
