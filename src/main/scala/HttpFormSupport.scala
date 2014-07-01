@@ -1,7 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 
 import spray.routing._
 import spray.http._
@@ -13,7 +13,7 @@ import shapeless.Traversables._
  */
 
 trait HttpFormSupport {
-  def postForm[C, M](action: String, exclude: String*) = macro HttpFormSupportImpl.postForm0[C, M]
+  def postForm[C, M](action: String, exclude: String*): Route = macro HttpFormSupportImpl.postForm0[C, M]
 
   /**
    * Take an action which use as route path. ANd excluded arguments, when excluded is present,
@@ -43,7 +43,7 @@ trait HttpFormSupport {
    * @tparam M - you model
    * @return Route
    */
-  def postForm[C, M](tuple: (PathMatcher[_ <: HList], String), exclude: String*) = macro HttpFormSupportImpl.postForm1[C, M]
+  def postForm[C, M](tuple: (PathMatcher[_ <: HList], String), exclude: String*): Route = macro HttpFormSupportImpl.postForm1[C, M]
 
 }
 

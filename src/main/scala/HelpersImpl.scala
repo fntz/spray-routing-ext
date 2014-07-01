@@ -1,7 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 import spray.routing.PathMatcher
 import shapeless._
 import shapeless.Traversables._

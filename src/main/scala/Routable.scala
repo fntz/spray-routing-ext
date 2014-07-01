@@ -1,7 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 
 import spray.routing._
 import scala.language.implicitConversions
@@ -61,7 +61,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
+  def resourse[C, M](exclude: List[String]): Route  = macro RoutableImpl.resourse0Impl[C, M]
 
   /** Define routes with nested block
    *  {{{
@@ -74,7 +74,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
+  def resourse[C, M](block: Route): Route = macro RoutableImpl.resourse1Impl[C, M]
 
   /** Define routes without excluded actions, and nested block
    *  {{{
@@ -88,7 +88,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
+  def resourse[C, M](exclude: List[String], block: Route): Route = macro RoutableImpl.resourseImpl[C, M]
 
   /** Simple define routes
    * {{{
@@ -98,12 +98,12 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
+  def resourse[C, M]: Route = macro RoutableImpl.resourse4Impl[C, M]
 
 
-  def resourse[C, M](exclude: List[String], sub: PathMatcher1[_]) = macro RoutableImpl.resourse5Impl[C, M]
-  def resourse[C, M](sub: PathMatcher1[_], block: Route) = macro RoutableImpl.resourse6Impl[C, M]
-  def resourse[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]) = macro RoutableImpl.resourse7Impl[C, M]
+  def resourse[C, M](exclude: List[String], sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse5Impl[C, M]
+  def resourse[C, M](sub: PathMatcher1[_], block: Route): Route = macro RoutableImpl.resourse6Impl[C, M]
+  def resourse[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse7Impl[C, M]
 
 
 }

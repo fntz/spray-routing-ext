@@ -1,7 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 
 import spray.routing._
 import spray.http._
@@ -20,7 +20,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def get0[C](action: String)    = macro HttpMethodsImpl.get01Impl[C]
+  def get0[C](action: String): Route    = macro HttpMethodsImpl.get01Impl[C]
 
   /**
    * Take an action which use as route path.
@@ -29,7 +29,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def post0[C](action: String)   = macro HttpMethodsImpl.post01Impl[C]
+  def post0[C](action: String): Route   = macro HttpMethodsImpl.post01Impl[C]
 
   /**
    * Take an action which use as route path.
@@ -38,7 +38,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def put0[C](action: String)    = macro HttpMethodsImpl.put01Impl[C]
+  def put0[C](action: String): Route    = macro HttpMethodsImpl.put01Impl[C]
 
   /**
    * Take an action which use as route path.
@@ -47,7 +47,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def delete0[C](action: String) = macro HttpMethodsImpl.delete01Impl[C]
+  def delete0[C](action: String): Route = macro HttpMethodsImpl.delete01Impl[C]
 
   /**
    * Take a tuple with path and method for controller
@@ -66,7 +66,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def get0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.get0Impl[C]
+  def get0[C](tuple: (PathMatcher[_ <: HList], String)): Route    = macro HttpMethodsImpl.get0Impl[C]
 
   /**
    * Take a tuple with path and method for controller
@@ -85,7 +85,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def post0[C](tuple: (PathMatcher[_ <: HList], String))   = macro HttpMethodsImpl.post0Impl[C]
+  def post0[C](tuple: (PathMatcher[_ <: HList], String)): Route   = macro HttpMethodsImpl.post0Impl[C]
 
   /**
    * Take a tuple with path and method for controller
@@ -104,7 +104,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def put0[C](tuple: (PathMatcher[_ <: HList], String))    = macro HttpMethodsImpl.put0Impl[C]
+  def put0[C](tuple: (PathMatcher[_ <: HList], String)): Route    = macro HttpMethodsImpl.put0Impl[C]
 
   /**
    * Take a tuple with path and method for controller
@@ -123,7 +123,7 @@ trait HttpMethods {
    * @tparam C - your controller
    * @return Route
    */
-  def delete0[C](tuple: (PathMatcher[_ <: HList], String)) = macro HttpMethodsImpl.delete0Impl[C]
+  def delete0[C](tuple: (PathMatcher[_ <: HList], String)): Route = macro HttpMethodsImpl.delete0Impl[C]
 }
 
 /**

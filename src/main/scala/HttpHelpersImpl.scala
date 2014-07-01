@@ -1,7 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 
 import spray.routing._
 import spray.http._
@@ -29,7 +29,7 @@ trait HttpHelpers {
    * @tparam C - you controller type
    * @return Route
    */
-  def match0[C](action: String)                                                  = macro HttpHelpersImpl.match01[C]
+  def match0[C](action: String): Route = macro HttpHelpersImpl.match01[C]
 
   /**
    * Take a method. And provide transformation into route.
@@ -52,7 +52,7 @@ trait HttpHelpers {
    * @tparam C: you controller type
    * @return Route
    */
-  def match0[C](action: String, via: List[HttpMethod])                           = macro HttpHelpersImpl.match02[C]
+  def match0[C](action: String, via: List[HttpMethod]): Route = macro HttpHelpersImpl.match02[C]
 
   /**
    * Take a path with method for handle request. By default use spray.http.HttpMethods.GET for http method.
@@ -71,7 +71,7 @@ trait HttpHelpers {
    * @tparam C - you controller
    * @return Route
    */
-  def match0[C](tuple: (PathMatcher[_ <: HList], String))                        = macro HttpHelpersImpl.match03[C]
+  def match0[C](tuple: (PathMatcher[_ <: HList], String)): Route = macro HttpHelpersImpl.match03[C]
 
   /** Take a path with method for handle request, with list of http methods.
    *
@@ -95,7 +95,7 @@ trait HttpHelpers {
    * @tparam C - you controller type
    * @return Route
    */
-  def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]) = macro HttpHelpersImpl.match0Impl[C]
+  def match0[C](tuple: (PathMatcher[_ <: HList], String), via: List[HttpMethod]): Route = macro HttpHelpersImpl.match0Impl[C]
 
   /** A root path
    *  {{{
@@ -109,7 +109,7 @@ trait HttpHelpers {
    * @tparam C - you controller type
    * @return Route
    */
-  def root[C](action: String)           = macro HttpHelpersImpl.rootImpl[C]
+  def root[C](action: String): Route = macro HttpHelpersImpl.rootImpl[C]
 
   /** Method for create
    *
@@ -130,7 +130,7 @@ trait HttpHelpers {
    * @param block - block of routes
    * @return Route
    */
-  def scope(path: String)(block: Route) = macro HttpHelpersImpl.scopeImpl
+  def scope(path: String)(block: Route): Route = macro HttpHelpersImpl.scopeImpl
 }
 
 /**

@@ -2,7 +2,7 @@ package com.github.fntzr.spray.routing.ext
 
 import spray.http.MediaType
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox.Context
 import spray.routing.Route
 import spray.httpx.marshalling.ToResponseMarshallable
 /** A BaseController trait
