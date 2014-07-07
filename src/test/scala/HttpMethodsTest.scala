@@ -53,9 +53,6 @@ class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with
   def actorRefFactory = system
 
   describe("get0") {
-    it ("das") {
-      1 should be(1)
-    }
     it("should take a parameter when parameter pass as part of path") {
       Get("/foo/42") ~> route ~> check {
         responseAs[String] should startWith("42")
