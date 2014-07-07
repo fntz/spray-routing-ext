@@ -7,8 +7,11 @@ object SprayRoutingExtBuild extends Build {
 
   val setting = Defaults.defaultSettings ++ Seq(
     scalacOptions ++= Seq("-Xlog-free-terms", "-deprecation", "-feature"),
-    scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
+    scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits"),
+    resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
   )
+
+  val sprayVersion = "1.3.1"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
@@ -31,13 +34,13 @@ object SprayRoutingExtBuild extends Build {
       publishArtifact in Test := false,
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" % "akka-actor_2.10" % "2.3.4",
+        "com.typesafe.akka" % "akka-actor_2.11" % "2.3.4",
         "org.scala-lang"    %  "scala-reflect"   % "2.11.1",
-        "io.spray"          %  "spray-can"     % "1.3.1",
-        "io.spray"          %  "spray-routing" % "1.3.1",
+        "io.spray"          %%  "spray-can"     % sprayVersion,
+        "io.spray"          %%  "spray-routing" % sprayVersion,
         "org.scalatest"     %% "scalatest" % "2.2.0" % "test",
-        "io.spray"          %  "spray-testkit" % "1.3.1" % "test",
-        "com.softwaremill.scalamacrodebug" %% "macros" % "0.4" % "test"
+        "org.scalactic"     %% "scalactic" % "2.2.0" % "test",
+        "io.spray"          %%  "spray-testkit" % sprayVersion % "test"
       ),
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
     )
