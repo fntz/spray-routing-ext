@@ -6,6 +6,7 @@ import spray.testkit.ScalatestRouteTest
 import spray.routing._
 import spray.http.HttpHeaders._
 import com.github.fntzr.spray.routing.ext._
+import spray.testkit._
 
 
 trait Controller extends BaseController {
@@ -40,48 +41,50 @@ trait Controller extends BaseController {
 
 
 
-trait Routing123 extends Routable {
-   val route  = get0[Controller]("foo" ~> "foo1")//get0[Controller](("foo" / IntNumber) ~> "foo")// ~
-//    get0[Controller](("foo" / Segment) ~> "foo0") ~
-//    get0[Controller]("foo" ~> "foo1") ~
-//    get0[Controller]("baz") ~
-//    get0[Controller]("custom")
+trait Routing extends Routable {
+  val route  = get0[Controller](("foo" / IntNumber) ~> "foo") ~
+    get0[Controller](("foo" / Segment) ~> "foo0") ~
+    get0[Controller]("foo" ~> "foo1") ~
+    get0[Controller]("baz") ~
+    get0[Controller]("custom")
 }
 
-class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing123 {
+class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
   describe("get0") {
+    it ("das") {
+      1 should be(1)
+    }
     it("should take a parameter when parameter pass as part of path") {
       Get("/foo/42") ~> route ~> check {
         responseAs[String] should startWith("42")
       }
     }
 
-//    it("should take a parameter when parameter as path") {
-//      Get("/foo/bar") ~> route ~> check {
-//        responseAs[String] should startWith("bar")
-//      }
-//    }
-//
-//    it("should call method from type") {
-//      Get("/foo") ~> route ~> check {
-//        responseAs[String] should startWith("pass")
-//      }
-//    }
-//
-//    it("should pass into default action for one argument") {
-//      Get("/baz") ~> route ~> check {
-//        responseAs[String] should startWith("baz")
-//      }
-//    }
-//
-//    it("should get headers from controller") {
-//      Get("/custom") ~> route ~> check {
-//        headers.filter(_.is("mysuperheader")) === List(RawHeader("MySuperHeader", "wow"))
-//        responseAs[String] should startWith("custom")
-//      }
-//    }
+    it("should take a parameter when parameter as path") {
+      Get("/foo/bar") ~> route ~> check {
+        responseAs[String] should startWith("bar")
+      }
+    }
+
+    it("should call method from type") {
+      Get("/foo") ~> route ~> check {
+        responseAs[String] should startWith("pass")
+      }
+    }
+
+    it("should pass into default action for one argument") {
+      Get("/baz") ~> route ~> check {
+        responseAs[String] should startWith("baz")
+      }
+    }
+
+    it("should get headers from controller") {
+      Get("/custom") ~> route ~> check {
+        headers.filter(_.is("mysuperheader")) === List(RawHeader("MySuperHeader", "wow"))
+        responseAs[String] should startWith("custom")
+      }
+    }
   }
 }
-

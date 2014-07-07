@@ -1,6 +1,7 @@
 package com.github.fntzr.spray.routing.ext
 
 import spray.http.Uri.Path
+import spray.routing
 
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
@@ -8,7 +9,7 @@ import spray.routing.PathMatcher
 import shapeless._
 import shapeless.Traversables._
 import spray.routing.PathMatcher0
-
+import spray.routing.Route
 
 /**
  * Provides implicits for String and spray.routing.PathMatcher
@@ -31,24 +32,26 @@ trait Helpers {
    */
 object HelpersImpl {
 
-  def alias0Impl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
+  def alias0Impl(c: Context)(action: c.Expr[String]) = {
     import c.universe._
 
     val segment = c.prefix.tree.children.toList(1)
-    //FIXME: must be create instance withou hacks
-    val pm = c.Expr[PathMatcher[_ <: HList]](q""" "" / $segment """)
-    val t = q"""($pm, $action)"""
-    //println(c.Expr[(PathMatcher[_ <: HList], String)](t))
+    val pm = c.prefix.tree.children.toList(1)
+    val z = pm match {
+      case Literal(Constant(x)) => x.asInstanceOf[String]
+    }
+
+    val t = q"""(PathMatcher.segmentStringToPathMatcher($z), $action)"""
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
 
-  def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
+  def aliasImpl(c: Context)(action: c.Expr[String]) = {
     import c.universe._
 
     val pm = c.prefix.tree.children.toList(1)
 
     val t = q"($pm, $action)"
-    println(c.Expr[(PathMatcher[_ <: HList], String)](t))
+
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
 
