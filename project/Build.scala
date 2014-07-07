@@ -10,8 +10,6 @@ object SprayRoutingExtBuild extends Build {
     scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
   )
 
-
-
   lazy val mainProject = Project(
     id = "spray-routing-ext",
     base = file("."),
@@ -38,25 +36,26 @@ object SprayRoutingExtBuild extends Build {
         "io.spray"          %  "spray-can"     % "1.3.1",
         "io.spray"          %  "spray-routing" % "1.3.1",
         "org.scalatest"     %% "scalatest" % "2.2.0" % "test",
-        "io.spray"          %  "spray-testkit" % "1.3.1" % "test"
+        "io.spray"          %  "spray-testkit" % "1.3.1" % "test",
+        "com.softwaremill.scalamacrodebug" %% "macros" % "0.4" % "test"
       ),
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
     )
   )
 
-  lazy val sampleProject = Project(
-    id = "sample",
-    base = file("sample"),
-    settings = Project.defaultSettings ++ setting ++ Seq(
-      name := "ext-sample",
-      version := "0.1-SNAPSHOT",
-      scalaVersion := "2.10.3",
-      resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
-      libraryDependencies ++= Seq(
+  // lazy val sampleProject = Project(
+  //   id = "sample",
+  //   base = file("sample"),
+  //   settings = Project.defaultSettings ++ setting ++ Seq(
+  //     name := "ext-sample",
+  //     version := "0.1-SNAPSHOT",
+  //     scalaVersion := "2.10.3",
+  //     resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
+  //     libraryDependencies ++= Seq(
 
-      )
-    )
-  ) dependsOn(mainProject)
+  //     )
+  //   )
+  // ) dependsOn(mainProject)
 
   val pomXml =
       <url>https://github.com/fntzr/spray-routing-ext</url>

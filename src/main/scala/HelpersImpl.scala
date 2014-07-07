@@ -1,10 +1,14 @@
 package com.github.fntzr.spray.routing.ext
 
+import spray.http.Uri.Path
+
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 import spray.routing.PathMatcher
 import shapeless._
 import shapeless.Traversables._
+import spray.routing.PathMatcher0
+
 
 /**
  * Provides implicits for String and spray.routing.PathMatcher
@@ -15,7 +19,7 @@ import shapeless.Traversables._
  */
 trait Helpers {
   implicit class S2A(path: String) {
-    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.aliasImpl
+    def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.alias0Impl
   }
   implicit class PM2A(pm: PathMatcher[_ <: HList]) {
     def ~>(action: String):(PathMatcher[_ <: HList], String) = macro HelpersImpl.aliasImpl
@@ -27,11 +31,24 @@ trait Helpers {
    */
 object HelpersImpl {
 
+  def alias0Impl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
+    import c.universe._
+
+    val segment = c.prefix.tree.children.toList(1)
+    //FIXME: must be create instance withou hacks
+    val pm = c.Expr[PathMatcher[_ <: HList]](q""" "" / $segment """)
+    val t = q"""($pm, $action)"""
+    //println(c.Expr[(PathMatcher[_ <: HList], String)](t))
+    c.Expr[(PathMatcher[_ <: HList], String)](t)
+  }
+
   def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
     import c.universe._
 
     val pm = c.prefix.tree.children.toList(1)
+
     val t = q"($pm, $action)"
+    println(c.Expr[(PathMatcher[_ <: HList], String)](t))
     c.Expr[(PathMatcher[_ <: HList], String)](t)
   }
 
@@ -49,7 +66,7 @@ object HelpersImpl {
     import c.universe._
     val requestVal = List(q"val request: spray.http.HttpRequest")
     val outerMethod = c.enclosingMethod
-    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != null) {
+    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != EmptyTree) {
 
       val vs = (outerMethod match {
         case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs

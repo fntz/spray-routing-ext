@@ -40,15 +40,15 @@ trait Controller extends BaseController {
 
 
 
-trait Routing extends Routable {
-   val route  = get0[Controller](("foo" / IntNumber) ~> "foo")// ~
+trait Routing123 extends Routable {
+   val route  = get0[Controller]("foo" ~> "foo1")//get0[Controller](("foo" / IntNumber) ~> "foo")// ~
 //    get0[Controller](("foo" / Segment) ~> "foo0") ~
 //    get0[Controller]("foo" ~> "foo1") ~
 //    get0[Controller]("baz") ~
 //    get0[Controller]("custom")
 }
 
-class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
+class HttpMethodsTest extends FunSpec with Matchers with ScalatestRouteTest with Routing123 {
   def actorRefFactory = system
 
   describe("get0") {

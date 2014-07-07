@@ -162,7 +162,6 @@ object HttpMethodsImpl {
 
   def get0Impl[C: c.WeakTypeTag](c: Context)
                                 (tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Expr[Route] = {
-    println(123)
     methodImpl[C](c)(tuple, HttpMethods.GET)
   }
 
@@ -195,7 +194,8 @@ object HttpMethodsImpl {
     } else {
       pm.tpe.foreach {
         case x  =>
-          if (x.termSymbol.isPackage && x.toString.contains("scala")) count += 1
+          if (x.termSymbol.isPackage && (x.toString.contains("scala")) || x.toString == "String" ) count += 1
+
       }
     }
 
