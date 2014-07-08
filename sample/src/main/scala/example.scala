@@ -32,6 +32,7 @@ trait PostController extends BaseController with DBInj with HtmlViewInj {
   implicit val timeout = Timeout(3 seconds)
 
   def index = {
+    println("123")
     val posts = Await.result(db ? Index, timeout.duration).asInstanceOf[HashMap[Int, Post]]
     respond(render.indexView(posts))
   }
@@ -216,7 +217,7 @@ trait HtmlView {
 }
 
 trait ApplicationRouteService extends Routable {
-  import Blog._
+
 
   def route(db: ActorRef, render: HtmlView) =  {
     resourse[PostController, Post](exclude("create"), {
@@ -234,6 +235,8 @@ class ServiceActor(db: ActorRef) extends Actor with ApplicationRouteService {
 object Blog extends App {
   implicit val system = ActorSystem("blog")
   val db = system.actorOf(Props[DBActor], "db")
+
   val service = system.actorOf(Props(classOf[ServiceActor], db), "blog-service")
+
   IO(Http) ! Http.Bind(service, "localhost", port = 8080)
 }
