@@ -25,7 +25,7 @@ trait Helpers {
   /**
    *  Containt macros for [[spray.routing.ext.Helpers]]
    */
-object HelpersImpl {
+private [ext] object HelpersImpl {
 
   def aliasImpl(c: Context)(action: c.Expr[String]): c.Expr[(PathMatcher[_ <: HList], String)] = {
     import c.universe._

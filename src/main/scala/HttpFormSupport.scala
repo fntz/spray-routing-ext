@@ -47,7 +47,7 @@ trait HttpFormSupport {
 
 }
 
-object HttpFormSupportImpl {
+private [ext] object HttpFormSupportImpl {
 
   def postForm0[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                (action: c.Expr[String], exclude: c.Expr[String]*): c.Expr[Route] = {
