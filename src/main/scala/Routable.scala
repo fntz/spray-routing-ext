@@ -20,7 +20,7 @@ object exclude {
 }
 
 /**
- * Trait contatin methods for resourse implementation.
+ * Trait, which contain methods for resourse implementation.
  *  With resourse method you might quick create routes for you controller. Also map form information onto Model.
  *  {{{
  *    resourse[Controller, Model]
@@ -86,8 +86,59 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
   def resourse[C, M]: Route = macro RoutableImpl.resourse4Impl[C, M]
 
 
+  /**
+   * Define resourse with specified subroute
+   *
+   * {{{
+   *   resourse[Controller, Model](exclude("show"), Segment)
+   * }}}
+   *
+   * @param exclude  - list of excluded methods
+   * @param sub      - part of route, which will be pass into controller method, and use for create a url
+   * @tparam C - Controller
+   * @tparam M - Model
+   * @return Route
+   */
   def resourse[C, M](exclude: List[String], sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse5Impl[C, M]
+
+  /**
+   * Define resourse with subroute and nexted block
+   *
+   * {{{
+   *   resourse[Controller, Model](IntNumber, {
+   *     pathPrefix("/path") {
+   *        get { complete { "path" } }
+   *     }
+   *  }
+   * }}}
+   *
+   * @param sub - part of route, which will be pass into controller method
+   * @param block - nested route block, and use for create a url
+   * @tparam C - Controller
+   * @tparam M - Model
+   * @return Route
+   */
   def resourse[C, M](sub: PathMatcher1[_], block: Route): Route = macro RoutableImpl.resourse6Impl[C, M]
+
+  /**
+   * Define resourse with subroute, block and excluded methods.
+   *
+   * {{{
+   *   resourse[Controller, Method](exclude("show"), {
+   *     pathPrefix("/path") {
+   *       complete{ "path" }
+   *     }
+   *   },
+   *   IntNumber)
+   * }}}
+   *
+   * @param exclude - list of excluded methods
+   * @param block - nested route block
+   * @param sub - part of route, which will be pass into controller method, and use for create a url
+   * @tparam C
+   * @tparam M
+   * @return
+   */
   def resourse[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse7Impl[C, M]
 
 

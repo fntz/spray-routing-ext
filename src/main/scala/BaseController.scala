@@ -43,7 +43,7 @@ trait BaseController {
 trait RespondToSupport { //: StandardRoute
   /**
    * With this method, possibly create a simple response by current `Accept header`
-   * @example
+   * {{{
    *          trait MyController extends BaseController with RespondToSupport {
    *            import HttpService._ // !!!important, because macro expand with methods from this namespace
    *            def index = {
@@ -57,9 +57,9 @@ trait RespondToSupport { //: StandardRoute
    *          //And then request with Accept: `text/html` we get a "html response"
    *          //And when request with Accept: `application/json` and wit ajax, we get a "json response"
    *          //Otherwise get Error: 400 Bad Request
-   *
-   * Underhood this transform to next code:
-   * @example
+   * }}}
+   * Under the hood this transform to next code:
+   * {{{
    *          val header = request.headers.find(_.name == "Accept") //request from BaseController
    *          header match {
    *             case Some(header) =>
@@ -74,7 +74,7 @@ trait RespondToSupport { //: StandardRoute
    *                }
    *             case None => reject(...)
    *          }
-   *
+   * }}}
    * @param pf: PartialFunction[MediaType, ToResponseMarshallable] a case block
    * @return Route
    */
