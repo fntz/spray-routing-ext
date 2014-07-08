@@ -133,7 +133,7 @@ private [ext] object RespondMacro {
     }
 
 
-    val result = q"""
+    val endResult = q"""
        val $name = request.headers.find(_.name == "Accept")
        $name match {
           case Some(header) =>
@@ -144,7 +144,7 @@ private [ext] object RespondMacro {
         }
     """
 
-    c.Expr[Route](result)
+    c.Expr[Route](endResult)
   }
 }
 
