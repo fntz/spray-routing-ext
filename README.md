@@ -1,7 +1,5 @@
 Extension for create a Rails like routes for http://spray.io/
 
-My post about: [spray-routing-ext: Extend spray-routing](http://fntzr.github.io/scala/2014/04/20/spray-routing-ext-extend-spray-routing.html)
-
 Api doc: [doc](http://fntzr.github.io/api/#com.github.fntzr.spray.routing.ext.Routable)
 
 Example: [blog](https://github.com/fntzr/spray-routing-ext/blob/master/sample/src/main/scala/example.scala)
@@ -275,6 +273,13 @@ trait PostController extends BaseController {
   //others...
 }
 ```
+
+
+More info
+-----------
+
+My post about: [spray-routing-ext: Extend spray-routing](http://fntzr.github.io/scala/2014/04/20/spray-routing-ext-extend-spray-routing.html)
+              
 
 
 License
