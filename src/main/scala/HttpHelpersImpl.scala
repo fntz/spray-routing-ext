@@ -137,7 +137,7 @@ trait HttpHelpers {
  * Object with macro implementation for [[spray.routing.ext.HttpHelpers]]
  *
  */
-object HttpHelpersImpl {
+private [ext] object HttpHelpersImpl {
   def scopeImpl(c: Context)(path: c.Expr[String])(block: c.Expr[Route]): c.Expr[Route] = {
     import c.universe._
 

@@ -46,19 +46,19 @@ object SprayRoutingExtBuild extends Build {
     )
   )
 
-  // lazy val sampleProject = Project(
-  //   id = "sample",
-  //   base = file("sample"),
-  //   settings = Project.defaultSettings ++ setting ++ Seq(
-  //     name := "ext-sample",
-  //     version := "0.1-SNAPSHOT",
-  //     scalaVersion := "2.10.3",
-  //     resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
-  //     libraryDependencies ++= Seq(
+  lazy val sampleProject = Project(
+     id = "sample",
+     base = file("sample"),
+     settings = Project.defaultSettings ++ setting ++ Seq(
+       name := "ext-sample",
+       version := "0.1-SNAPSHOT",
+       scalaVersion := "2.11.1",
+       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
+       libraryDependencies ++= Seq(
 
-  //     )
-  //   )
-  // ) dependsOn(mainProject)
+       )
+     )
+  ) dependsOn(mainProject)
 
   val pomXml =
       <url>https://github.com/fntzr/spray-routing-ext</url>

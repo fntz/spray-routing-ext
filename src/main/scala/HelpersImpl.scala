@@ -30,7 +30,7 @@ trait Helpers {
   /**
    *  Containt macros for [[spray.routing.ext.Helpers]]
    */
-object HelpersImpl {
+private [ext] object HelpersImpl {
 
   def alias0Impl(c: Context)(action: c.Expr[String]) = {
     import c.universe._

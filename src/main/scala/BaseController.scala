@@ -81,7 +81,7 @@ trait RespondToSupport { //: StandardRoute
   def respondTo(pf: PartialFunction[MediaType, ToResponseMarshallable]): Route = macro RespondMacro.respondImpl
 }
 
-object RespondMacro {
+private [ext] object RespondMacro {
   def respondImpl(c: Context)(pf: c.Expr[PartialFunction[MediaType, ToResponseMarshallable]]): c.Expr[Route] = {
     import c.universe._
 

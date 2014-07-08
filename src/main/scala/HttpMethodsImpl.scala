@@ -130,7 +130,7 @@ trait HttpMethods {
  * Object with http methods implementation.
  *
  */
-object HttpMethodsImpl {
+private [ext] object HttpMethodsImpl {
 
   def get01Impl[C: c.WeakTypeTag](c: Context)(action: c.Expr[String]): c.Expr[Route] = {
     import c.universe._

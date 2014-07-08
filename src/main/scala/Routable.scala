@@ -111,7 +111,7 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
 /** Object, which contatain resourse implementation.
  *
  */
-object RoutableImpl {
+private [ext] object RoutableImpl {
   import spray.routing.Route
 
   def resourse7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
