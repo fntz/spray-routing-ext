@@ -2,7 +2,6 @@ import sbt._
 import sbt.Keys._
 import xerial.sbt.Sonatype._
 import xerial.sbt.Sonatype.SonatypeKeys._
-import spray.revolver.RevolverPlugin._
 
 object SprayRoutingExtBuild extends Build {
 
@@ -50,7 +49,7 @@ object SprayRoutingExtBuild extends Build {
   lazy val sampleProject = Project(
      id = "sample",
      base = file("sample"),
-     settings = Project.defaultSettings ++ Revolver.settings ++ setting ++ Seq(
+     settings = Project.defaultSettings ++ setting ++ Seq(
        name := "ext-sample",
        version := "0.1-SNAPSHOT",
        scalaVersion := "2.11.1",
