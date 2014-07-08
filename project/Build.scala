@@ -10,7 +10,7 @@ object SprayRoutingExtBuild extends Build {
     scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
   )
 
-
+  val sprayVersion = "1.3.1"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
@@ -36,10 +36,10 @@ object SprayRoutingExtBuild extends Build {
         "com.typesafe.akka" %% "akka-actor" % "2.3.4",
         "org.scala-lang"    %  "scala-reflect"   % "2.10.4",
         "org.scalamacros"   %%  "quasiquotes" % "2.0.1",
-        "io.spray"          %  "spray-can"     % "1.3.1",
-        "io.spray"          %  "spray-routing" % "1.3.1",
+        "io.spray"          %  "spray-can"     % sprayVersion,
+        "io.spray"          %  "spray-routing" % sprayVersion,
         "org.scalatest"     %% "scalatest" % "2.0" % "test",
-        "io.spray"          %  "spray-testkit" % "1.3.1" % "test"
+        "io.spray"          %  "spray-testkit" % sprayVersion % "test"
       ),
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
     )
