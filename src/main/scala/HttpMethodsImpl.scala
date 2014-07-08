@@ -216,12 +216,6 @@ private [ext] object HttpMethodsImpl {
       q"controller.$method"
     }
 
-    val mainRoute = q"""
-      $httpMethod {
-        $complete
-      }
-    """
-
     val (sum: List[ValDef], names: List[Ident]) = HelpersImpl.extractValuesFromOuterMethod(c)
 
     val anonClassName = newTypeName(c.fresh("Controller"))
