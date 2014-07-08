@@ -16,13 +16,25 @@ In `Build.scala`
 
 ```scala
 "com.github.fntzr"  %% "spray-routing-ext" % "0.2"  // For scala 2.10
-"com.github.fntzr"  %% "spray-routing-ext" % "0.2"  // For scala 2.11
+"com.github.fntzr"  %% "spray-routing-ext" % "0.3"  // For scala 2.11
 ```
 
 Methods
 -------------------
 
-### Simle http methods
+### Include and use
+
+```scala
+import com.github.fntzr.spray.routing.ext._
+
+trait ApplicationRouteService extends Routable {
+  def route = ....
+}
+```
+
+
+
+### Simple http methods
 
 In package defined a `get0`, `post0`, `delete0`, and `put0` methods for handle request by Get, Post, Delete or Put http method.
 
@@ -56,7 +68,7 @@ This is a `match0`, `root` and `scope` methods.
 + `scope` - define route `path` with nested block, all url paths will be start with `path`
 
 ```scala 
-  match0[Controller]("path-name") ~                                  // GET example.com/path-name
+  match0[Controller]("path-name") ~                                   // GET example.com/path-name
   match0[Controller]("another-path" ~> "action", List(GET, DELETE) ~  // GET | DELETE example.com/another-path
   root[Controller]("action")                                          // GET example.com/
   scope("scope") {
@@ -106,6 +118,9 @@ GET    example.com/model/new
 In `resourse` you might exclude unnecessary methods, or define nested block, and you might define own [separator](http://spray.io/documentation/1.1-SNAPSHOT/api/index.html#spray.routing.PathMatchers)
 
 [More](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FRoutableTest.scala#L154) [resourses](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FSpecifySubrouteTest.scala#L71)
+
+#### Note: For Controller define method `fresh` instead of `new`, because in scala, `new` reserved keyworld.
+
 
 ### Controllers
 
@@ -180,7 +195,6 @@ trait Controller {
 }
 ```
 
-#### Note: For Controller define method `fresh` instead of `new`, because in scala, `new` reserved keyworld.
  
 
 
@@ -222,6 +236,44 @@ trait PostController extends BaseController {
   //others...
 }
 ```
+
+### DI
+
+Often need a pass into controllers some values (bd connection, actor path, predefined values...)
+
+It's a simple:
+
+```scala
+
+trait RouteService extends Routable {
+  def route(db: ActorRef, render: Render) =  { // method take a `db` connection and `renderer`
+    resourse[PostController, Post]
+  }
+}
+
+class MyService extends Actor with RouteService {
+  val db = ...
+  val render = ....
+  def receive = runRoute(route(db, render))
+                        ^^^^^^^^^^^^^^^^^^^^^
+                          pass `db` connection and `renderer`
+                               
+}
+
+trait Injection {
+  val db: ActorRef
+  val render: Render
+}
+
+//then into PostController 
+
+trait PostController extends BaseController with RespondToSupport with Injection {
+                                                                      ^^^^^^^^^^^^
+   ....                                                                     
+}
+```
+
+When application srart, in PostController possible use a `db` and `render`.
 
 
 
