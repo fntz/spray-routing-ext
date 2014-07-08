@@ -1,0 +1,7 @@
+Version 0.2 (2.10) and 0.3 (2.11)
+
+* Fix bug with root url (issues#2)
+* Specify route separator (issues#5)
+* Form support (issues#3)
+* respondTo support (issues#7)
+
