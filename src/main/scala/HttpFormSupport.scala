@@ -18,8 +18,8 @@ trait HttpFormSupport {
   /**
    * Take an action which use as route path. ANd excluded arguments, when excluded is present,
    * then form transform to Map[String, Any], otherwise create a new Model instance.
+   * {{{
    *
-   * @example
    *          case class Model(id: Int, title: Option[String] = None)
    *          trait HttpFormController extends BaseController {
    *            import HttpService._
@@ -37,6 +37,7 @@ trait HttpFormSupport {
    *          postForm[HttpFormController, Model10]("post" ~> "post")
    *          Post("/another", FormData(Seq("title" -> "spray")))
    *          Post("/post", FormData(Seq("id" -> "10", "title" -> "spray")))
+   * }}}
    * @param tuple use as route and as method for controller
    * @param exclude excluded arguments
    * @tparam C - your controller
