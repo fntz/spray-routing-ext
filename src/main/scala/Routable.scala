@@ -19,21 +19,6 @@ object exclude {
   def apply(xs: String*) = xs.toList
 }
 
-/*
-def resourse[C, M](exclude: List[String])  = macro RoutableImpl.resourse0Impl[C, M]
-def resourse[C, M](block: Route) = macro RoutableImpl.resourse1Impl[C, M]
-def resourse[C, M](exclude: List[String], block: Route) = macro RoutableImpl.resourseImpl[C, M]
-def resourse[C, M] = macro RoutableImpl.resourse4Impl[C, M]
-
-subroute:
-
-def resourse[C, M](exclude: List[String], sub: PathMatcher1[_])
-def resourse[C, M](sub: PathMatcher1[_], block: Route)
-def resourse[C, M](exclude: List[String], sub: PathMatcher1[_], block: Route)
-
- */
-
-
 /**
  * Trait contatin methods for resourse implementation.
  *  With resourse method you might quick create routes for you controller. Also map form information onto Model.
