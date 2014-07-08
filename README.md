@@ -195,6 +195,45 @@ trait Controller {
 }
 ```
 
+
+### DI
+
+Often need a pass into controllers some values (bd connection, actor path, predefined values...)
+
+It's a simple:
+
+```scala
+
+trait RouteService extends Routable {
+  def route(db: ActorRef, render: Render) =  { // method take a `db` connection and `renderer`
+    resourse[PostController, Post]
+  }
+}
+
+class MyService extends Actor with RouteService {
+  val db = ...
+  val render = ....
+  def receive = runRoute(route(db, render))
+                        ^^^^^^^^^^^^^^^^^^^^^
+                          pass `db` connection and `renderer`
+                               
+}
+
+trait Injection {
+  val db: ActorRef
+  val render: Render
+}
+
+//then into PostController 
+
+trait PostController extends BaseController with RespondToSupport with Injection {
+                                                                      ^^^^^^^^^^^^
+   ....                                                                     
+}
+```
+
+When application srart, in PostController possible use a `db` and `render`.
+
  
 
 
@@ -236,45 +275,6 @@ trait PostController extends BaseController {
   //others...
 }
 ```
-
-### DI
-
-Often need a pass into controllers some values (bd connection, actor path, predefined values...)
-
-It's a simple:
-
-```scala
-
-trait RouteService extends Routable {
-  def route(db: ActorRef, render: Render) =  { // method take a `db` connection and `renderer`
-    resourse[PostController, Post]
-  }
-}
-
-class MyService extends Actor with RouteService {
-  val db = ...
-  val render = ....
-  def receive = runRoute(route(db, render))
-                        ^^^^^^^^^^^^^^^^^^^^^
-                          pass `db` connection and `renderer`
-                               
-}
-
-trait Injection {
-  val db: ActorRef
-  val render: Render
-}
-
-//then into PostController 
-
-trait PostController extends BaseController with RespondToSupport with Injection {
-                                                                      ^^^^^^^^^^^^
-   ....                                                                     
-}
-```
-
-When application srart, in PostController possible use a `db` and `render`.
-
 
 
 License
