@@ -62,7 +62,7 @@ In package defined a `get0`, `post0`, `delete0`, and `put0` methods for handle r
 This is a `match0`, `root` and `scope` methods. 
 
 + `math0` - used for define routes for few methods together
-+ `root`  - just alias for `get0[Controller]("/" ~> "action")
++ `root`  - just alias for `get0\[Controller\]("/" ~> "action")
 + `scope` - define route `path` with nested block, all url paths will be start with `path`
 
 ```scala 
