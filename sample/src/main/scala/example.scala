@@ -1,3 +1,5 @@
+import spray.httpx.marshalling.ToResponseMarshallable
+
 import scala.concurrent.{Future, Await}
 import scala.Some
 import com.github.fntzr.spray.routing.ext._
@@ -30,58 +32,60 @@ trait PostController extends BaseController with DBInj with HtmlViewInj {
   import HttpService._
 
   implicit val timeout = Timeout(3 seconds)
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def respond(t: ToResponseMarshallable) = respondWithMediaType(`text/html`) & complete(t)
 
   def index = {
-    val posts = Await.result(db ? Index, timeout.duration).asInstanceOf[HashMap[Int, Post]]
-    respond(render.indexView(posts))
+    respond {
+      (db ? Index).mapTo[HashMap[Int, Post]].map { posts =>
+        render.indexView(posts)
+      }
+    }
   }
 
   def edit(id: Int) = {
-    val post = Await.result(db ? Show(id), timeout.duration).asInstanceOf[Option[Post]]
-    respond(render.editView(post))
+    respond {
+      (db ? Show(id)).mapTo[Option[Post]].map { post =>
+        render.editView(post)
+      }
+    }
   }
 
   def create = {
     formFields('title, 'description) { (title, description) =>
-      val future = db ? Create(title, description)
-      val id = Await.result(future, timeout.duration).asInstanceOf[Int]
-      val uri = s"/post/${id}"
-      redirect(uri, StatusCodes.MovedPermanently)
+      onSuccess(db ? Create(title, description)) {
+        case id: Int => redirect(s"/post/${id}", StatusCodes.MovedPermanently)
+      }
     }
   }
 
   def show(id: Int) = {
-    val post = Await.result(db ? Show(id), timeout.duration).asInstanceOf[Option[Post]]
-    respond(render.showView(post))
+    respond {
+      (db ? Show(id)).mapTo[Option[Post]].map { post =>
+        render.showView(post)
+      }
+    }
   }
 
+
   def delete(id: Int) = {
-    val isDelete = Await.result(db ? Delete(id), timeout.duration).asInstanceOf[Boolean]
-    if (isDelete) {
-      redirect("/", StatusCodes.MovedPermanently)
-    } else {
-      respond(<span>Error with delete post with id: {id}</span>)
+    onSuccess(db ? Delete(id)) {
+      case isDelete: Boolean => redirect("/", StatusCodes.MovedPermanently)
     }
   }
 
   def update(id: Int) = {
     formFields('id.as[Int], 'title, 'description) { (id, title, description) =>
       val post = Post(id, title, description)
-      Await.result(db ? Update(post), timeout.duration).asInstanceOf[Boolean]
-      redirect(s"/post/${id}", StatusCodes.MovedPermanently)
+      onSuccess(db ? Update(post)) {
+        case x: Boolean => redirect(s"/post/${id}", StatusCodes.MovedPermanently)
+      }
     }
   }
 
   def fresh = {
     respond(render.freshView)
-  }
-
-  private def respond(html: scala.xml.Elem) = {
-    respondWithMediaType(`text/html`) {
-      complete {
-        {html}
-      }
-    }
   }
 
 }
