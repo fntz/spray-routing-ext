@@ -4,7 +4,7 @@ Api doc: [doc](http://fntzr.github.io/api/#com.github.fntzr.spray.routing.ext.Ro
 
 Example: [blog](https://github.com/fntzr/spray-routing-ext/blob/master/sample/src/main/scala/example.scala)
 
-Library add a `resourse, match0, get0, post0, delete0, put0, root` route directives.
+Library add a `resource, match0, get0, post0, delete0, put0, root` route directives.
 
 
 Install
@@ -74,9 +74,9 @@ This is a `match0`, `root` and `scope` methods.
   }
 ```
 
-### Resourse
+### Resource
 
-In Rails framework `resourse` it's a set routes (`index`, `show`, `edit`, `create`, `update`, `delete`, `new`) which operate a `Model`.
+In Rails framework `resource` it's a set routes (`index`, `show`, `edit`, `create`, `update`, `delete`, `new`) which operate a `Model`.
 All urls will be started with `/model/`. Example:
 
 ```scala
@@ -95,7 +95,7 @@ trait Controller {
 
 //route
   
-  resourse[Controller, Model](Segment)
+  resource[Controller, Model](Segment)
                              ^^^^^^^^^
                           define subroute, by default subroute is a IntNumber     
   
@@ -113,9 +113,9 @@ DELETE example.com/model/post-title
 GET    example.com/model/new 
 ```
 
-In `resourse` you might exclude unnecessary methods, or define nested block, and you might define own [separator](http://spray.io/documentation/1.1-SNAPSHOT/api/index.html#spray.routing.PathMatchers)
+In `resource` you might exclude unnecessary methods, or define nested block, and you might define own [separator](http://spray.io/documentation/1.1-SNAPSHOT/api/index.html#spray.routing.PathMatchers)
 
-[More](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FRoutableTest.scala#L154) [resourses](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FSpecifySubrouteTest.scala#L71)
+[More](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FRoutableTest.scala#L154) [resources](https://github.com/fntzr/spray-routing-ext/blob/master/src%2Ftest%2Fscala%2FSpecifySubrouteTest.scala#L71)
 
 #### Note: For Controller define method `fresh` instead of `new`, because in scala, `new` reserved keyworld.
 
@@ -204,7 +204,7 @@ It's a simple:
 
 trait RouteService extends Routable {
   def route(db: ActorRef, render: Render) =  { // method take a `db` connection and `renderer`
-    resourse[PostController, Post]
+    resource[PostController, Post]
   }
 }
 
@@ -245,7 +245,7 @@ Usage
 import com.github.fntzr.spray-routing-ext._
 
 trait MyRoutes extends Routable {
-  val route = resourse[PostController, Post] {
+  val route = resource[PostController, Post] {
     pathPrefixt("foo") {
       get {
         complete{"foo"}
@@ -254,7 +254,7 @@ trait MyRoutes extends Routable {
   } ~ get0[OtherController]("route") ~
   post0[Controller0](("foo" / IntNumber) ~> "action") ~
   match0[Controller0]("bar", List(GET, POST, PUT)) ~
-  resourse[ModelController, Model] ~
+  resource[ModelController, Model] ~
   root[PostController]("index")
 }
 ```

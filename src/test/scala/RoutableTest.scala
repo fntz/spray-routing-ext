@@ -152,27 +152,27 @@ trait Controller4 extends BaseController {
 trait Routing extends Routable {
 
   val route =
-   resourse[Controller0, Model0](exclude(), {
+   resource[Controller0, Model0](exclude(), {
       pathPrefix("foo") {
         get {
           complete{"bar"}
         }
       }
      }) ~
-   resourse[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show"))  ~
-   resourse[Controller2, Model2]({
+   resource[Controller1, Model1](exclude("index", "edit", "delete", "create", "update", "show"))  ~
+   resource[Controller2, Model2]({
      get0[Controller2]("index")
    }) ~
-   resourse[Controller3, Model3]
+   resource[Controller3, Model3]
 
-  val route1 = resourse[Controller4, Model4]
+  val route1 = resource[Controller4, Model4]
 
 }
 
-class ResourseTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
+class ResourceTest extends FunSpec with Matchers with ScalatestRouteTest with Routing {
   def actorRefFactory = system
 
-  describe("resourse") {
+  describe("resource") {
     it ("when exclude is empty") {
       Get("/model0/index") ~> route ~> check{
         responseAs[String] should startWith("index")

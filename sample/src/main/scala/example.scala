@@ -223,7 +223,7 @@ trait ApplicationRouteService extends Routable {
   import Blog._
 
   def route(db: ActorRef, render: HtmlView) =  {
-    resourse[PostController, Post](exclude("create"), {
+    resource[PostController, Post](exclude("create"), {
       post0[PostController]("create")
     }) ~ root[PostController]("index")
   }

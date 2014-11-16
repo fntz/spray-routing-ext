@@ -38,7 +38,7 @@ private [ext] object HelpersImpl {
     /**
      * When route define in method:
      *   def myMethod(a: Int, s: String) = {
-     *      resourse[C, M]
+     *      resource[C, M]
      *   }
      *
      *  This methods return all arguments from outer method (a, s) + define request0 value, also return all names for params
