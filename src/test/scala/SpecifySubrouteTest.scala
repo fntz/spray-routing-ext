@@ -68,15 +68,15 @@ trait Controller2 extends BaseController {
 }
 
 trait Routing extends Routable {
-  val route = resourse[Controller, Model0](exclude("new", "create", "index"), Segment) ~
-              resourse[Controller2, Model2](exclude("new", "create", "index"), {
+  val route = resource[Controller, Model0](exclude("new", "create", "index"), Segment) ~
+              resource[Controller2, Model2](exclude("new", "create", "index"), {
                 pathPrefix("z") {
                   get {
                     complete{"z"}
                   }
                 }
               }, DoubleNumber) ~
-              resourse[Controller, Model1](Segment, {
+              resource[Controller, Model1](Segment, {
                 pathPrefix("z") {
                   get {
                     complete{"z"}

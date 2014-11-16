@@ -20,10 +20,10 @@ object exclude {
 }
 
 /**
- * Trait, which contain methods for resourse implementation.
- *  With resourse method you might quick create routes for you controller. Also map form information onto Model.
+ * Trait, which contain methods for resource implementation.
+ *  With resource method you might quick create routes for you controller. Also map form information onto Model.
  *  {{{
- *    resourse[Controller, Model]
+ *    resource[Controller, Model]
  *  }}}
  *   transform to
  *  {{{
@@ -39,18 +39,18 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
 
   /** Define routes without excluded pathes.
    * {{{
-   *   resourse[Controller, Model](exclude("index", "show", "new"))
+   *   resource[Controller, Model](exclude("index", "show", "new"))
    * }}}
    * @param exclude - list with excluded methods (index, show, ...)
    * @tparam C - you controller
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](exclude: List[String]): Route  = macro RoutableImpl.resourse0Impl[C, M]
+  def resource[C, M](exclude: List[String]): Route  = macro RoutableImpl.resource0Impl[C, M]
 
   /** Define routes with nested block
    *  {{{
-   *    resourse[Controller, Model] {
+   *    resource[Controller, Model] {
    *      get0[Controller]("other")
    *    }
    *  }}}
@@ -59,11 +59,11 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](block: Route): Route = macro RoutableImpl.resourse1Impl[C, M]
+  def resource[C, M](block: Route): Route = macro RoutableImpl.resource1Impl[C, M]
 
   /** Define routes without excluded actions, and nested block
    *  {{{
-   *    resourse[Controller, Model](exclude("index"), {
+   *    resource[Controller, Model](exclude("index"), {
    *      get0[Controller]("other")
    *    })
    *  }}}
@@ -73,24 +73,24 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M](exclude: List[String], block: Route): Route = macro RoutableImpl.resourseImpl[C, M]
+  def resource[C, M](exclude: List[String], block: Route): Route = macro RoutableImpl.resourceImpl[C, M]
 
   /** Simple define routes
    * {{{
-   *   resourse[Controller, Model]
+   *   resource[Controller, Model]
    * }}}
    * @tparam C - you controller
    * @tparam M - you model
    * @return Route
    */
-  def resourse[C, M]: Route = macro RoutableImpl.resourse4Impl[C, M]
+  def resource[C, M]: Route = macro RoutableImpl.resource4Impl[C, M]
 
 
   /**
-   * Define resourse with specified subroute
+   * Define resource with specified subroute
    *
    * {{{
-   *   resourse[Controller, Model](exclude("show"), Segment)
+   *   resource[Controller, Model](exclude("show"), Segment)
    * }}}
    *
    * @param exclude  - list of excluded methods
@@ -99,13 +99,13 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - Model
    * @return Route
    */
-  def resourse[C, M](exclude: List[String], sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse5Impl[C, M]
+  def resource[C, M](exclude: List[String], sub: PathMatcher1[_]): Route = macro RoutableImpl.resource5Impl[C, M]
 
   /**
-   * Define resourse with subroute and nexted block
+   * Define resource with subroute and nexted block
    *
    * {{{
-   *   resourse[Controller, Model](IntNumber, {
+   *   resource[Controller, Model](IntNumber, {
    *     pathPrefix("/path") {
    *        get { complete { "path" } }
    *     }
@@ -118,13 +118,13 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M - Model
    * @return Route
    */
-  def resourse[C, M](sub: PathMatcher1[_], block: Route): Route = macro RoutableImpl.resourse6Impl[C, M]
+  def resource[C, M](sub: PathMatcher1[_], block: Route): Route = macro RoutableImpl.resource6Impl[C, M]
 
   /**
-   * Define resourse with subroute, block and excluded methods.
+   * Define resource with subroute, block and excluded methods.
    *
    * {{{
-   *   resourse[Controller, Method](exclude("show"), {
+   *   resource[Controller, Method](exclude("show"), {
    *     pathPrefix("/path") {
    *       complete{ "path" }
    *     }
@@ -139,18 +139,18 @@ trait Routable extends HttpService with HttpMethods with HttpHelpers with Helper
    * @tparam M
    * @return
    */
-  def resourse[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]): Route = macro RoutableImpl.resourse7Impl[C, M]
+  def resource[C, M](exclude: List[String], block: Route, sub: PathMatcher1[_]): Route = macro RoutableImpl.resource7Impl[C, M]
 
 
 }
 
-/** Object, which contatain resourse implementation.
+/** Object, which contatain resource implementation.
  *
  */
 private [ext] object RoutableImpl {
   import spray.routing.Route
 
-  def resourse7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resource7Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (exclude: c.Expr[List[String]], block: c.Expr[Route], sub: c.Expr[PathMatcher1[_]]): c.Expr[Route] = {
     import c.universe._
 
@@ -178,18 +178,18 @@ private [ext] object RoutableImpl {
   }
 
 
-  def resourse6Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resource6Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (sub: c.Expr[PathMatcher1[_]], block: c.Expr[Route]): c.Expr[Route] = {
 
     import c.universe._
 
-    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block, $sub)"""
+    val route = q"""resource[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block, $sub)"""
 
     c.Expr[Route](route)
   }
 
 
-  def resourse5Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resource5Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (exclude: c.Expr[List[String]], sub: c.Expr[PathMatcher1[_]]): c.Expr[Route] = {
     import c.universe._
 
@@ -198,7 +198,7 @@ private [ext] object RoutableImpl {
     val result = getRoute[C, M](c)(exclude, sub)
 
     if (result.isEmpty) {
-      c.error(c.enclosingPosition, s"resourse should have a Route type")
+      c.error(c.enclosingPosition, s"resource should have a Route type")
     }
 
     val route = q"""
@@ -211,22 +211,22 @@ private [ext] object RoutableImpl {
   }
 
 
-  def resourse4Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
+  def resource4Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context): c.Expr[Route] = {
     import c.universe._
 
-    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String]())"""
+    val route = q"""resource[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String]())"""
     c.Expr[Route](route)
   }
 
-  def resourse1Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resource1Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (block: c.Expr[Route]): c.Expr[Route] = {
     import c.universe._
 
-    val route = q"""resourse[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block)"""
+    val route = q"""resource[${c.weakTypeOf[C]}, ${c.weakTypeOf[M]}](List[String](), $block)"""
     c.Expr[Route](route)
   }
 
-  def resourse0Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resource0Impl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                    (exclude: c.Expr[List[String]]): c.Expr[Route] = {
     import c.universe._
 
@@ -235,7 +235,7 @@ private [ext] object RoutableImpl {
     val result = getRoute[C, M](c)(exclude, c.Expr[PathMatcher1[_]](q"IntNumber"))
 
     if (result.isEmpty) {
-      c.error(c.enclosingPosition, s"resourse should have a Route type")
+      c.error(c.enclosingPosition, s"resource should have a Route type")
     }
 
     val route = q"""
@@ -246,7 +246,7 @@ private [ext] object RoutableImpl {
 
     c.Expr[Route](route)
   }
-  def resourseImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
+  def resourceImpl[C: c.WeakTypeTag, M: c.WeakTypeTag](c: Context)
                   (exclude: c.Expr[List[String]], block: c.Expr[Route]): c.Expr[Route] = {
     import c.universe._
 
