@@ -13,8 +13,8 @@ Install
 In `Build.scala`
 
 ```scala
-"com.github.fntzr"  %% "spray-routing-ext" % "0.2"  // For scala 2.10
-"com.github.fntzr"  %% "spray-routing-ext" % "0.3"  // For scala 2.11
+"com.github.fntzr"  %% "spray-routing-ext" % "0.2.1"  // For scala 2.10
+"com.github.fntzr"  %% "spray-routing-ext" % "0.3.1"  // For scala 2.11
 ```
 
 Methods
