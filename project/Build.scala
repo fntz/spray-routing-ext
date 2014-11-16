@@ -18,7 +18,7 @@ object SprayRoutingExtBuild extends Build {
     settings = Project.defaultSettings ++ setting ++ sonatypeSettings ++ Seq(
       organization := "com.github.fntzr",
       name := "spray-routing-ext",
-      version := "0.2",
+      version := "0.2.1",
       scalaVersion := "2.10.4",
       licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
       publishTo <<= version { v: String =>
