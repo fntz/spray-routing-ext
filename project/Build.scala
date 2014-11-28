@@ -19,8 +19,8 @@ object SprayRoutingExtBuild extends Build {
     settings = Project.defaultSettings ++ setting ++ sonatypeSettings ++ Seq(
       organization := "com.github.fntzr",
       name := "spray-routing-ext",
-      version := "0.3.1",
-      scalaVersion := "2.11.1",
+      version := "0.3.2",
+      scalaVersion := "2.11.4",
       licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
       publishTo <<= version { v: String =>
         val nexus = "https://oss.sonatype.org/"
@@ -34,10 +34,10 @@ object SprayRoutingExtBuild extends Build {
       publishArtifact in Test := false,
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" % "akka-actor_2.11" % "2.3.4",
-        "org.scala-lang"    %  "scala-reflect"   % "2.11.1",
-        "io.spray"          %%  "spray-can"     % sprayVersion,
-        "io.spray"          %%  "spray-routing" % sprayVersion,
+        "com.typesafe.akka" % "akka-actor_2.11" % "2.3.7" % "provided",
+        "org.scala-lang"    %  "scala-reflect"   % "2.11.4",
+        "io.spray"          %%  "spray-can"     % sprayVersion % "provided",
+        "io.spray"          %%  "spray-routing" % sprayVersion % "provided",
         "org.scalatest"     %% "scalatest" % "2.2.0" % "test",
         "org.scalactic"     %% "scalactic" % "2.2.0" % "test",
         "io.spray"          %%  "spray-testkit" % sprayVersion % "test"
