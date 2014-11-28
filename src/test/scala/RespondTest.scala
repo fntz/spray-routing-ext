@@ -6,15 +6,14 @@ import spray.routing._
 import spray.http.MediaTypes._
 import spray.http.StatusCodes.BadRequest
 import com.github.fntzr.spray.routing.ext._
-
+import spray.http.StatusCodes._
 
 trait Controller extends BaseController with RespondToSupport {
   import HttpService._
   def show = {
     respondTo {
-      case `text/css`    => "css"
-      case `text/plain`  => "text"
-      case  _            => "?"
+      case `text/plain` => "plain text"
+      case `application/xml`  => "sad"
     }
   }
 }
@@ -29,16 +28,16 @@ class RespondTest extends FunSpec with Matchers with ScalatestRouteTest with Rou
   describe("respond to") {
     it("complete by accept header") {
       Get("/show") ~> addHeader("Accept", "text/plain") ~> route ~> check {
-        responseAs[String] should startWith("text")
+        responseAs[String] should startWith("plain text")
       }
-      Get("/show") ~> addHeader("Accept", "text/css,*/*;q=0.1") ~> route ~> check {
-        responseAs[String] should startWith("css")
+      Get("/show") ~> addHeader("Accept", "application/xml") ~> route ~> check {
+        responseAs[String] should startWith("sad")
       }
-      Get("/show") ~> addHeader("Accept", "text/xml") ~> sealRoute(route) ~> check {
-        status should be(BadRequest)
+      Get("/show") ~> addHeader("Accept", "application/json") ~> sealRoute(route) ~> check {
+        status should be(NotAcceptable)
       }
       Get("/show") ~> sealRoute(route) ~> check {
-        status should be(BadRequest)
+        status should be(NotAcceptable)
       }
     }
   }
