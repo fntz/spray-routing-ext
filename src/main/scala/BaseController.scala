@@ -1,10 +1,5 @@
 package com.github.fntzr.spray.routing.ext
 
-import spray.http.MediaType
-import scala.language.experimental.macros
-import scala.reflect.macros.whitebox.Context
-import spray.routing.Route
-import spray.httpx.marshalling.ToResponseMarshallable
 /** A BaseController trait
  *
  *  It a top hierarchy controllers. You can extend own controller
@@ -40,47 +35,7 @@ trait BaseController {
   def request: spray.http.HttpRequest
 }
 
-trait RespondToSupport { //: StandardRoute
-  /**
-   * With this method, possibly create a simple response by current `Accept header`
-   * {{{
-   *          trait MyController extends BaseController with RespondToSupport {
-   *            import HttpService._ // !!!important, because macro expand with methods from this namespace
-   *            def index = {
-   *              respondTo {
-   *                case `text/html` => "html response"
-   *                case `application/json` if this_ajax_request => "json response"
-   *              }
-   *            }
-   *          }
-   *
-   *          //And then request with Accept: `text/html` we get a "html response"
-   *          //And when request with Accept: `application/json` and wit ajax, we get a "json response"
-   *          //Otherwise get Error: 400 Bad Request
-   * }}}
-   * Under the hood this transform to next code:
-   * {{{
-   *          val header = request.headers.find(_.name == "Accept") //request from BaseController
-   *          header match {
-   *             case Some(header) =>
-   *                val h = header.value
-   *                h match {
-   *                  case value if h.contains(`media/type`.value) && you_guard =>
-   *                    respondWithMediaType(`media/type`) {
-   *                      complete { you_response } // from previous: it's a "html response" or "json response"
-   *                    }
-   *                  //other cases
-   *                  case _ => reject(...)
-   *                }
-   *             case None => reject(...)
-   *          }
-   * }}}
-   * @param pf: PartialFunction[MediaType, ToResponseMarshallable] a case block
-   * @return Route
-   */
-  def respondTo(pf: PartialFunction[MediaType, ToResponseMarshallable]): Route = macro RespondMacro.respondImpl
-}
-
+/*
 private [ext] object RespondMacro {
   def respondImpl(c: Context)(pf: c.Expr[PartialFunction[MediaType, ToResponseMarshallable]]): c.Expr[Route] = {
     import c.universe._
@@ -148,3 +103,4 @@ private [ext] object RespondMacro {
   }
 }
 
+*/
