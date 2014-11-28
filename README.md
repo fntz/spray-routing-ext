@@ -13,9 +13,11 @@ Install
 In `Build.scala`
 
 ```scala
-"com.github.fntzr"  %% "spray-routing-ext" % "0.2.1"  // For scala 2.10
-"com.github.fntzr"  %% "spray-routing-ext" % "0.3.1"  // For scala 2.11
+"com.github.fntzr"  %% "spray-routing-ext" % "0.2.2"  // For scala 2.10
+"com.github.fntzr"  %% "spray-routing-ext" % "0.3.2"  // For scala 2.11
 ```
+
+Also you need add into you `Build.scala` file `akka`, `spray-can`, and `spray-routing`.
 
 Methods
 -------------------
@@ -167,7 +169,7 @@ trait MyController extends BaseController with RespondToSupport {
 
 Now, when we request content with `Accept: text/html` will be got a `<html><body>....</body></html>` response,
 when we request content with `Accept: application/json` with ajax, will be got `""" { json: "ok" } """`,
-otherwise will be got `BadRequest`.
+otherwise will be got `406 Not Acceptable` Response Error.
  
 ### Form support
 
