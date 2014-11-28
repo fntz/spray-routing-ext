@@ -3,9 +3,9 @@ package com.github.fntzr.spray.routing.ext
 import scala.language.experimental.macros
 import scala.reflect.macros.Context
 
-import spray.http.MediaType
+import spray.http.{StatusCodes, MediaType}
+import spray.http.StatusCodes._
 import spray.httpx.marshalling.ToResponseMarshallable
-import spray.http.MediaType
 import spray.routing.Route
 import spray.httpx.marshalling.ToResponseMarshallable
 import spray.routing._
@@ -26,7 +26,7 @@ trait RespondToSupport { //: StandardRoute
    *
    *          //And then request with Accept: `text/html` we get a "html response"
    *          //And when request with Accept: `application/json` and wit ajax, we get a "json response"
-   *          //Otherwise get Error: 400 Bad Request
+   *          //Otherwise get Error: 406 Not Acceptable
    * }}}
    * Under the hood this transform to next code:
    * {{{
@@ -40,9 +40,9 @@ trait RespondToSupport { //: StandardRoute
    *                      complete { you_response } // from previous: it's a "html response" or "json response"
    *                    }
    *                  //other cases
-   *                  case _ => reject(...)
+   *                  case _ => reject(UnacceptedResponseContentTypeRejection)
    *                }
-   *             case None => reject(...)
+   *             case None => reject(UnacceptedResponseContentTypeRejection)
    *          }
    * }}}
    * @param pf: PartialFunction[MediaType, ToResponseMarshallable] a case block
@@ -70,27 +70,15 @@ private [ext] object RespondMacro {
             }
         }
     }
-    val r = result.flatten
-
-    val allowMediaTypes = (r.collect {
-      case (t, _, _) if s"$t" != "_" => s"$t"
-    }).mkString(",")
-
-    val msg = s"Only the following media types are supported: $allowMediaTypes"
-
-
-    val default = r.collect {
-      case (mType, guard, tree) if s"$mType" == "_" => q"""reject(MalformedHeaderRejection("Accept", $msg))"""
+    val r = result.flatten.partition {
+      case (mType, guard, tree) => if (s"$mType" != "_") true else false
     }
 
-    if (default.size == 0) {
-      c.error(c.enclosingPosition, "Specify default branch as `case _ => 'result'`")
+    if (!r._2.isEmpty) {
+      c.error(c.enclosingPosition, "Default value not supported. Specify all accept types.")
     }
 
-    val resultDefault = default(0)
-
-
-    val cases = r.collect {
+    val cases = r._1.collect {
       case (mType, guard, tree) if s"$mType" != "_" =>
         val g = if (guard == EmptyTree) {
           q"true"
@@ -98,19 +86,27 @@ private [ext] object RespondMacro {
           guard
         }
         cq"""$x if $g && $h.contains($mType.value) => respondWithMediaType($mType) { complete{$tree} }"""
-      case (mType, _, tree) if s"$mType" == "_" =>
-        cq"""_ => reject(MalformedHeaderRejection("Accept", $msg))"""
     }
 
+    val allowMediaTypes = (r._1.collect {
+      case (t, _, _) => s"$t"
+    }).mkString(",")
+
+    val msg = s"Only the following media types are supported: $allowMediaTypes"
+
+    val default = cq""" _ => complete(NotAcceptable, $msg)"""
+
+    val z = cases ++ List(default)
 
     val endResult = q"""
        val $name = request.headers.find(_.name == "Accept")
+
        $name match {
           case Some(header) =>
             val $h = header.value
-            $h match { case ..$cases }
+            $h match { case ..$z }
           case None =>
-            $resultDefault
+            complete(NotAcceptable, $msg)
         }
     """
 
