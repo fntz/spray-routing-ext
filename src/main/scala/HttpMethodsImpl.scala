@@ -230,7 +230,6 @@ private [ext] object HttpMethodsImpl {
         }
       """
 
-    //TODO: generate class name on fly
     val route = if (count != 0) {
       q"""
         pathPrefix($pm) { ..$paramVals =>

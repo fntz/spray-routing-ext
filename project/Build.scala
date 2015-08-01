@@ -10,15 +10,15 @@ object SprayRoutingExtBuild extends Build {
     scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
   )
 
-  val sprayVersion = "1.3.1"
+  val sprayVersion = "1.3.2"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
     base = file("."),
     settings = Project.defaultSettings ++ setting ++ sonatypeSettings ++ Seq(
-      organization := "com.github.fntzr",
+      organization := "com.github.fntz",
       name := "spray-routing-ext",
-      version := "0.2.2",
+      version := "0.2.3",
       scalaVersion := "2.10.4",
       licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
       publishTo <<= version { v: String =>
@@ -51,7 +51,7 @@ object SprayRoutingExtBuild extends Build {
     settings = Project.defaultSettings ++ setting ++ Seq(
       name := "ext-sample",
       version := "0.1-SNAPSHOT",
-      scalaVersion := "2.10.3",
+      scalaVersion := "2.10.4",
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
 
@@ -60,16 +60,16 @@ object SprayRoutingExtBuild extends Build {
   ) dependsOn(mainProject)
 
   val pomXml =
-      <url>https://github.com/fntzr/spray-routing-ext</url>
+      <url>https://github.com/fntz/spray-routing-ext</url>
       <scm>
-        <url>git@github.com:fntzr/spray-routing-ext.git</url>
-        <connection>scm:git:git@github.com:fntzr/spray-routing-ext.git</connection>
+        <url>git@github.com:fntz/spray-routing-ext.git</url>
+        <connection>scm:git:git@github.com:fntz/spray-routing-ext.git</connection>
       </scm>
       <developers>
         <developer>
-          <id>fntzr</id>
+          <id>fntz</id>
           <name>Mike</name>
-          <url>https://github.com/fntzr</url>
+          <url>https://github.com/fntz</url>
         </developer>
       </developers>
 }
