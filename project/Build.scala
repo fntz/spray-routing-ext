@@ -10,7 +10,7 @@ object SprayRoutingExtBuild extends Build {
     scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
   )
 
-  val sprayVersion = "1.3.2"
+  val sprayVersion = "1.3.1"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
