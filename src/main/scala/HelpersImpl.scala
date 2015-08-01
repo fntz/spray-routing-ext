@@ -68,14 +68,13 @@ private [ext] object HelpersImpl {
   def extractValuesFromOuterMethod(c: Context) = {
     import c.universe._
     val requestVal = List(q"val request: spray.http.HttpRequest")
-    val outerMethod = c.enclosingMethod
-    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod != EmptyTree) {
+    val outerMethod = c.internal.enclosingOwner
 
-      val vs = (outerMethod match {
-        case DefDef(_, _, _, List(List(xs @ _*)), _, _) => xs
-      }).asInstanceOf[List[ValDef]]
+    val (sum: List[ValDef], names: List[Ident]) = if (outerMethod.isMethod) {
 
-      val vvs = vs.map{case x: ValDef => q"val ${x.name}:${x.tpt}"}
+      val vs = outerMethod.asMethod.paramLists.flatten
+
+      val vvs = vs.map{x => q"val ${x.asTerm.name}:${x.typeSignature}"}
 
       val sum = requestVal ++ vvs
 

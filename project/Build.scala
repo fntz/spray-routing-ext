@@ -11,7 +11,7 @@ object SprayRoutingExtBuild extends Build {
     resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
   )
 
-  val sprayVersion = "1.3.1"
+  val sprayVersion = "1.3.2"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
@@ -19,8 +19,8 @@ object SprayRoutingExtBuild extends Build {
     settings = Project.defaultSettings ++ setting ++ sonatypeSettings ++ Seq(
       organization := "com.github.fntzr",
       name := "spray-routing-ext",
-      version := "0.3.2",
-      scalaVersion := "2.11.4",
+      version := "0.3.3",
+      scalaVersion := "2.11.6",
       licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
       publishTo <<= version { v: String =>
         val nexus = "https://oss.sonatype.org/"
@@ -35,7 +35,7 @@ object SprayRoutingExtBuild extends Build {
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" % "akka-actor_2.11" % "2.3.7" % "provided",
-        "org.scala-lang"    %  "scala-reflect"   % "2.11.4",
+        "org.scala-lang"    %  "scala-reflect"   % "2.11.6",
         "io.spray"          %%  "spray-can"     % sprayVersion % "provided",
         "io.spray"          %%  "spray-routing" % sprayVersion % "provided",
         "org.scalatest"     %% "scalatest" % "2.2.0" % "test",
@@ -61,16 +61,16 @@ object SprayRoutingExtBuild extends Build {
   ) dependsOn(mainProject)
 
   val pomXml =
-      <url>https://github.com/fntzr/spray-routing-ext</url>
+      <url>https://github.com/fntz/spray-routing-ext</url>
       <scm>
-        <url>git@github.com:fntzr/spray-routing-ext.git</url>
-        <connection>scm:git:git@github.com:fntzr/spray-routing-ext.git</connection>
+        <url>git@github.com:fntz/spray-routing-ext.git</url>
+        <connection>scm:git:git@github.com:fntz/spray-routing-ext.git</connection>
       </scm>
       <developers>
         <developer>
-          <id>fntzr</id>
+          <id>fntz</id>
           <name>Mike</name>
-          <url>https://github.com/fntzr</url>
+          <url>https://github.com/fntz</url>
         </developer>
       </developers>
 }
