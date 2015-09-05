@@ -13,11 +13,13 @@ Install
 In `Build.scala`
 
 ```scala
-"com.github.fntzr"  %% "spray-routing-ext" % "0.2.2"  // For scala 2.10
-"com.github.fntzr"  %% "spray-routing-ext" % "0.3.2"  // For scala 2.11
+"com.github.fntzr"  %% "spray-routing-ext" % "0.2.3"  // For scala 2.10
+"com.github.fntzr"  %% "spray-routing-ext" % "0.3.3"  // For scala 2.11
 ```
 
-Also you need add into you `Build.scala` file `akka`, `spray-can`, and `spray-routing`.
+Also you need add into you `Build.scala` file `akka`, `spray-can`, and
+`spray-routing` or `spray-routing-shapeless2` for scala2.11.
+Also version 0.3.3 require shapeless `2.1.0` in scope.
 
 Methods
 -------------------
@@ -287,7 +289,7 @@ My post about: [spray-routing-ext: Extend spray-routing](http://fntzr.github.io/
 License
 --------
 
-Copyright (c) 2014 fntzr <fantazuor@gmail.com>
+Copyright (c) 2014-2015 fntzr <mike.fch1@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
