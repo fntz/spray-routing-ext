@@ -4,9 +4,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 
 import spray.routing._
-import spray.http._
 import shapeless._
-import shapeless.Traversables._
 
 /**
  * Base trait, which add form to model serialization

@@ -1,15 +1,10 @@
 package com.github.fntzr.spray.routing.ext
 
-import spray.http.Uri.Path
-import spray.routing
+import shapeless._
+import spray.routing.PathMatcher
 
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
-import spray.routing.PathMatcher
-import shapeless._
-import shapeless.Traversables._
-import spray.routing.PathMatcher0
-import spray.routing.Route
 
 /**
  * Provides implicits for String and spray.routing.PathMatcher
@@ -107,7 +102,7 @@ private [ext] object HelpersImpl {
      Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "update")
      Tuple2.apply[ResorseTestable.this.IntNumber.type, String](ResorseTestable.this.IntNumber, "delete")
     */
-    val (_, _, action) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
+    val action = tuple.tree.children(2)
 
     val methodName = action match {
       case Literal(Constant(x)) => x.asInstanceOf[String]
@@ -126,9 +121,7 @@ private [ext] object HelpersImpl {
      *
      */
   def pathFromTuple[C: c.WeakTypeTag](c: Context)(tuple: c.Expr[(PathMatcher[_ <: HList], String)]): c.Tree = {
-    import c.universe._
-
-    val (_, pm, _) = tuple.tree.children.toHList[Tree::Tree::Tree::HNil].get.tupled
+    val pm = tuple.tree.children(1)
     pm
   }
 }

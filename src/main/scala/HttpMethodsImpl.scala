@@ -6,7 +6,6 @@ import scala.reflect.macros.whitebox.Context
 import spray.routing._
 import spray.http._
 import shapeless._
-import shapeless.Traversables._
 
 /** Trait contain http methods realisation
  *

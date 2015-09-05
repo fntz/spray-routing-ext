@@ -11,7 +11,7 @@ object SprayRoutingExtBuild extends Build {
     resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
   )
 
-  val sprayVersion = "1.3.2"
+  val sprayVersion = "1.3.3"
 
   lazy val mainProject = Project(
     id = "spray-routing-ext",
@@ -34,12 +34,13 @@ object SprayRoutingExtBuild extends Build {
       publishArtifact in Test := false,
       resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" % "akka-actor_2.11" % "2.3.7" % "provided",
+        "com.typesafe.akka" % "akka-actor_2.11" % "2.3.9" % "provided",
         "org.scala-lang"    %  "scala-reflect"   % "2.11.6",
+        "io.spray" % "spray-routing-shapeless2_2.11" % sprayVersion % "provided",
         "io.spray"          %%  "spray-can"     % sprayVersion % "provided",
-        "io.spray"          %%  "spray-routing" % sprayVersion % "provided",
         "org.scalatest"     %% "scalatest" % "2.2.0" % "test",
         "org.scalactic"     %% "scalactic" % "2.2.0" % "test",
+        "com.chuusai" %% "shapeless" % "2.1.0" % "provided",
         "io.spray"          %%  "spray-testkit" % sprayVersion % "test"
       ),
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
