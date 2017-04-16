@@ -1,3 +1,5 @@
+# project no longer supported. Use finagle/akka-http/http4s
+
 Extension for create a Rails like routes for http://spray.io/
 
 Api doc: [doc](http://fntzr.github.io/api/#com.github.fntzr.spray.routing.ext.Routable)
